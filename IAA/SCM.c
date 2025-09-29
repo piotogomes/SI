@@ -1,12 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-
-
-
-
-
 void scm_r(int i, int f, float seq[], int n, float* res) {
     if (i >= n) return; // Caso base: passou do fim
     if (f >= n) {
