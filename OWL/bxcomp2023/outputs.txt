@@ -1,0 +1,7 @@
+51 51 48 48 51 48 51 48 51 48 10 
+48 48 51 51 48 51 51 52 51 48 10 
+50 50 48 48 50 50 48 70 Opa, achei o item, Nitrato de Fala coruja297, esta na posicao 2x7, terei que fazer 0 pontos para conseguir chegar la.
+50 48 10 
+50 50 48 48 48 50 48 50 50 48 10 
+49 49 48 49 48 49 48 49 48 49 10 
+49 49 49 49 49 49 49 49 49 49 0 

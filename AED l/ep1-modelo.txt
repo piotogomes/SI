@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <malloc.h>
+
+
+// ######### ESCREVA o nro USP DO PRIMEIRO INTEGRANTE AQUI
+char* nroUSP1() {
+    return("0000000");
+}
+
+// ######### nro USP DO SEGUNDO INTEGRANTE (OU DEIXE COMO ESTA)
+char* nroUSP2() {
+    return("0000000");
+}
+
+// ######### NRO DO SEU GRUPO CONFORME PLANILHA
+int grupo() {
+    return 0;
+}
+
+
+// elemento da lista
+typedef struct estr {
+        int chave;
+        struct estr* prox;
+} NO;
+
+
+// lista
+typedef struct {
+	NO* inicio;
+} LISTA;
+
+
+// funcao principal
+void separar(LISTA* l1, LISTA* l2);
+
+//------------------------------------------
+// O EP consiste em implementar esta funcao
+// e outras funcoes auxiliares que esta
+// necessitar
+//------------------------------------------
+void separar(LISTA* l1, LISTA* l2) {
+
+	// seu codigo AQUI
+
+
+
+	return;
+}
+
+// por favor nao inclua nenhum codigo a ser entregue abaixo deste ponto
+
+//----------------------------------------------------------------
+// use main() apenas para fazer chamadas de teste ao seu programa
+//----------------------------------------------------------------
+int main() {
+
+	LISTA* l1 = (LISTA*) malloc(sizeof(LISTA));
+	LISTA* l2 = (LISTA*) malloc(sizeof(LISTA));
+	l1->inicio = NULL;
+	l2->inicio = NULL;
+
+
+	// aqui vc pode inserir elementos de teste nas listas l1 e l2
+
+	// o EP sera testado com chamadas deste tipo
+	separar(l1,l2);
+
+}
+
