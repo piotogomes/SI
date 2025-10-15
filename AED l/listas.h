@@ -2,6 +2,7 @@
 
 
 #define MAX 1000
+#define NP 5
 
 // LISTA SEQUENCIAL
 typedef struct {
@@ -64,12 +65,6 @@ bool llds_excluir(ListaLDS *l, int ch);
 bool llds_inserir(ListaLDS* l, int ch);
 
 
-
-
-
-
-
-
 // FILAS
 
 typedef struct s{
@@ -116,3 +111,91 @@ int filaDu_retornar1(FilaDupla* f);
 void filaDu_anexar2(FilaDupla* f, int ch);
 int filaDu_retornar2(FilaDupla* f);
 
+// PILHAS
+
+typedef struct s{
+    int chave;
+    struct s* prox;
+} NOpilha;
+
+typedef struct {
+    NOpilha* topo;
+} Pilha; // pilha din
+
+typedef struct s{
+    int chave;
+} NOPilhaEst;
+
+typedef struct {
+    NOPilhaEst A[MAX];
+    int topo;
+} PilhaEst; // pilha est
+
+typedef struct {
+    NOPilhaEst A[MAX];
+    int topo1;
+    int topo2;
+} PilhaDup; // pilha dupla no mesmo vetor
+
+typedef struct {
+    NOPilhaEst A[MAX];
+    int topo[NP + 1];
+    int base[NP + 1];
+} NPilhas; // pilha dupla no mesmo vetor
+
+
+
+void pilha_inicializar(Pilha* p);
+void pilha_inserir(Pilha* p, int ch);
+int pilha_retornar(Pilha* p);
+void pilhaEst_inicializar(PilhaEst* p);
+void pilhaEst_inserir(PilhaEst* p, int ch);
+int pilhaEst_retornar(PilhaEst* p);
+void pilhaDup_inicializar(PilhaDup* p);
+void pilhaDup_inserir1(PilhaDup* p, int ch);
+int pilhaDup_retornar1(PilhaDup* p);
+void pilhaDup_inserir2(PilhaDup* pi, int ch);
+int pilhaDup_retornar2(PilhaDup* pi);
+
+void NPilhas_inicializar(NPilhas* pi);
+void NPilhas_deslocarDir(NPilhas* pi, int k);
+void NPilhas_deslocarEsq(NPilhas* pi, int k);
+int NPilhas_cheia(NPilhas* pi, int k);
+int NPilhas_retornar(NPilhas* pi, int k);
+void NPilhas_inserir(NPilhas* pi, int k, int ch);
+
+// matriz esparsa
+
+typedef struct {
+    int Maxlinha;
+    int Maxcoluna;
+    NOMatrizEsp* ini;
+} MatrizEsp;
+
+
+typedef struct m {
+    int linha;
+    int coluna;
+    int chave;
+    struct m* prox;
+} NOMatrizEsp;
+
+// lista cruzada
+typedef struct
+{
+    NOListaCr *lin[MAX];
+    NOListaCr *col[MAX];
+} ListaCr;
+
+typedef struct m
+{
+    int l;
+    int c;
+    int chave;
+    struct m *proxLin;
+    struct m *proxCol;
+} NOListaCr;
+
+
+
+// LDS recursivamente

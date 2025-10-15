@@ -82,3 +82,9 @@ bool llds_inserir(ListaLDS* l, int ch) {
     return true;
 
 }
+
+void llds_exibirRECU(NOSim* p) {
+    if(p) printf("%d ", p->chave);
+    llds_exibirRECU(p->prox);
+    return;
+}
