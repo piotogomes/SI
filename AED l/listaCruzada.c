@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include "listas.h"
 
-void inicializar_LC(ListaCr *matriz)
+void LC_inicializar(ListaCr *matriz)
 {
-    for (int i = 0; i < MAX; i++)
+    for (int i = 0; i < MAX - 1; i++)
     {
         matriz->lin[i] = NULL;
         matriz->col[i] = NULL;
@@ -12,6 +12,7 @@ void inicializar_LC(ListaCr *matriz)
 
 NOListaCr *busca_LC(int i, int j, ListaCr *matriz, NOListaCr **esq, NOListaCr **acima)
 {
+
     NOListaCr *atual = matriz->lin[i];
     *esq = NULL;
     *acima = NULL;
@@ -22,7 +23,9 @@ NOListaCr *busca_LC(int i, int j, ListaCr *matriz, NOListaCr **esq, NOListaCr **
         *esq = atual;
         atual = atual->proxCol;
     }
+
     atual = matriz->col[i];
+
     while (atual)
     {
         if (atual->l >= i)
@@ -30,12 +33,12 @@ NOListaCr *busca_LC(int i, int j, ListaCr *matriz, NOListaCr **esq, NOListaCr **
         *acima = atual;
         atual = atual->proxLin;
     }
-    if (atual->l != i || atual->c != j)
+    if (atual && (atual->l != i || atual->c != j))
         return NULL;
     return atual;
 }
 
-void inserir_LC(int i, int j, int ch, ListaCr *matriz)
+void LC_inserir(int i, int j, int ch, ListaCr *matriz)
 {
     NOListaCr *esq;
     NOListaCr *acima;
@@ -106,16 +109,54 @@ int contarZeroLin(int i, ListaCr *matriz)
     return cont;
 }
 
-void exibirListaCr(ListaCr *matriz)
+void LC_exibir(ListaCr *matriz)
 {
-    for (int i = 0; i < MAX; i++)
+    for (int i = 0; i < MAX - 1; i++)
     {
         NOListaCr *atual = matriz->lin[i];
         while (atual)
         {
             printf("%d", atual->chave);
+            atual = atual->proxCol;
         }
-        atual = atual->proxCol;
+    }
+}
+
+void exibir_LC_zeros(ListaCr *matriz)
+{
+    for (int i = 0; i < MAX; i++)
+    {
+        NOListaCr *atual = matriz->lin[i];
+        if (!atual)
+        {
+            for (int j = 0; j < MAX - 1; j++)
+            {
+                printf("0 ");
+            }
+        }
+        else
+        {
+            int cont = 0;
+            while (atual)
+            {
+                for (int j = cont; j < atual->c; j++)
+                {
+                    printf("0 ");
+                    cont++;
+                }
+                printf("%d ", atual->chave);
+                if (atual->proxCol)
+                {
+                    cont = atual->proxCol->c - atual->c;
+                }
+                atual = atual->proxCol;
+            }
+            for (int j = cont; j < MAX - 1; j++)
+            {
+                printf("0 ");
+            }
+        }
+        printf("\n");
     }
 }
 
@@ -266,6 +307,7 @@ int LC_ME_iguais(MatrizEsp *matriz1, ListaCr *matriz2)
             NO_ME = NO_ME->prox;
         }
     }
-    if(NO_ME) return false;
+    if (NO_ME)
+        return false;
     return true;
 }

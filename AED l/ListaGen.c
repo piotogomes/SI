@@ -2,9 +2,6 @@
 #include "listas.h"
 
 
-
-
-
 void LG_exibir(NOListaGen* p) {
     NOListaGen* atual = p;
     while(atual) {
