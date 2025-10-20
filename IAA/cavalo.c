@@ -16,7 +16,7 @@ void tenta(int i, int d, int x, int y, bool *q, int **tab) {
         q1 = false;
         u = x + ver[k];
         v = y + hor[k];
-        // printf("k ");
+        // printf("%d ", k);
         if(u < d && u >= 0 && v < d && v >= 0) {
             if(tab[u][v] == 0) {
                 tab[u][v] = i;
@@ -55,6 +55,7 @@ int main() {
     }
     int x0, y0;
     scanf("%d %d", &x0, &y0);
+    tab[x0][y0] = 1;
     tenta(2, d, x0, y0, &q, tab);
     if(!q) {
         printf("sem solu\n");

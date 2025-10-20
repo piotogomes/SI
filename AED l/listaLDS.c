@@ -88,3 +88,11 @@ void llds_exibirRECU(NOSim* p) {
     llds_exibirRECU(p->prox);
     return;
 }
+
+void llds_inverterRECU(NOSim* p, NOSim* ant, NOSim** ini) {
+    if(p) {
+        llds_inverterRECU(p->prox, p, ini);
+        p->prox = ant;
+    }
+    else *ini = ant;
+}

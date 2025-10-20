@@ -199,3 +199,17 @@ typedef struct m
 
 
 // LDS recursivamente
+
+void llds_exibirRECU(NOSim* p);
+void llds_inverterRECU(NOSim* p, NOSim* ant, NOSim** ini);
+
+// Listas Generalizadas
+
+
+typedef struct s {
+    struct s *prox;
+    struct s *subLista;
+    int chave;
+    int tipo; // 1 = chave 2 = lista
+} NOListaGen;
+
