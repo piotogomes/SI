@@ -122,3 +122,16 @@ void NPilhas_inserir(NPilhas* pi, int k, int ch) {
         pi->A[pi->topo[k]].chave = ch;
     }
 }
+
+int menorPilha(NPilhas* pi) {
+    int menor = MAX;
+    int menorp;
+    for(int i = 0; i < NP; i++) {
+        if((pi->topo[i] - pi->base[i]) <= menor) {
+            menor = pi->topo[i] - pi->base[i];
+            menorp = i;
+        }
+    }
+    return menorp;
+
+}

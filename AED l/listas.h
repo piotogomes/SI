@@ -72,7 +72,7 @@ typedef struct s{
     struct s* prox;
 } NOfila;
 
-typedef struct {
+typedef struct b{
     NOfila* inicio;
     NOfila* fim;
 } Fila; // Fila din
@@ -96,7 +96,7 @@ typedef struct s{
 typedef struct {
     NOFilaDupla* inicio1;
     NOFilaDupla* inicio2;
-} FilaDupla; // Fila din
+} FilaDupla; // Fila din deque
 
 
 void fila_inicializar(Fila* f);
@@ -213,3 +213,11 @@ typedef struct s {
     int tipo; // 1 = chave 2 = lista
 } NOListaGen;
 
+
+// Arvores
+
+typedef struct ar {
+    int chave;
+    struct ar *esq;
+    struct ar *dir;
+} NOArvoreBIN;

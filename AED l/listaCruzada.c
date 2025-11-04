@@ -114,8 +114,8 @@ void exibirListaCr(ListaCr *matriz)
         while (atual)
         {
             printf("%d", atual->chave);
+            atual = atual->proxCol;
         }
-        atual = atual->proxCol;
     }
 }
 
@@ -266,6 +266,54 @@ int LC_ME_iguais(MatrizEsp *matriz1, ListaCr *matriz2)
             NO_ME = NO_ME->prox;
         }
     }
-    if(NO_ME) return false;
+    if (NO_ME)
+        return false;
     return true;
+}
+
+NOListaCr *listaDiagonal(ListaCr *m)
+{
+    NOListaCr *ant = NULL;
+    NOListaCr *inicio;
+    for (int i = 0; i < MAX; i++)
+    {
+        NOListaCr *atual = m->lin[i];
+        NOListaCr *novo = (NOListaCr *)malloc(sizeof(NOListaCr));
+        novo->proxCol = NULL;
+        while (atual)
+        {
+            if (!ant && atual->c == atual->l)
+            {
+                novo->chave = atual->chave;
+                inicio = novo;
+                ant = inicio;
+            }
+            else if (atual->c == atual->l)
+            {
+                novo->chave = atual->chave;
+                ant->proxCol = novo;
+                ant = novo;
+            }
+            else if (atual->c > atual->l)
+            {
+                novo->chave = 0;
+                ant->proxCol = novo;
+                ant = novo;
+            }
+            atual = atual->proxCol;
+        }
+        if (!atual)
+        {
+            novo->chave = 0;
+            if(!ant) {
+                inicio = novo;
+                ant = inicio;
+            }
+            else {
+                ant->proxCol = novo;
+                ant = novo;
+            }
+        }
+    }
+    return inicio;
 }
