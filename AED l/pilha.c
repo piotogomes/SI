@@ -71,7 +71,7 @@ int pilhaDup_retornar2(PilhaDup* pi) {
 }
 
 void NPilhas_inicializar(NPilhas* pi) {
-    for(int i  = 0; i <= NP; i++) {
+    for(int i = 0; i <= NP; i++) {
         pi->base[i] = (i*(MAX/NP)) - 1;
         pi->topo[i] = pi->base[i];
     }

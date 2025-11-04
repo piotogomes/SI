@@ -77,8 +77,8 @@ int main(int argc, char *argv[])
         dados[i] = (int *)malloc(sizeof(int) * 4);
     }
     // Dados : [[dimensão, branco, preto, dimensão total]
-    //          [dimensão, branco, preto, dimensão total]
-    //          [dimensão, branco, preto, dimensão total]
+    //          [dimensão, branco, preto, 0]
+    //          [dimensão, branco, preto, 0]
     //                               ...]
     for (int i = 0; i < dimensao; i++)
     {

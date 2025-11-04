@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "TEMPLATE.C": "cpp",
-        "BOT.C": "cpp"
+        "BOT.C": "cpp",
+        "stdio.h": "c",
+        "stdbool.h": "c"
     }
 }
