@@ -1,5 +1,7 @@
-3
-3
-1 2 3
-4 5 6
-7 8 9
+int conta (NO* raiz) {
+    if(!raiz) return 0;
+    int esq = conta(raiz->esq);
+    int dir = conta(raiz->dir);
+    if (esq > dir) return esq + 1;
+    else return dir + 1;
+}
