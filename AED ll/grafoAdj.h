@@ -8,10 +8,22 @@ typedef int Peso;
 
 typedef struct {
 
-    Peso g[Ver][Ver];
+    Peso matriz[Ver][Ver];
     int numVer;
 
 } Grafo;
 
+
+
+Grafo inicializarGrafoAdj(int vert) {
+    Grafo g;
+    g.numVer = vert;
+    for(int i = 0; i < vert; i++) {
+       for(int j = 0; j < vert; j++) {
+            g.matriz[i][j] = Nulo;
+        }   
+    }
+    return g;
+}
 
 
