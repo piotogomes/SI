@@ -4,7 +4,7 @@
 int main() {
 
     Grafo g;
-    g = inicializarGrafoAdj(10);
+    inicializarGrafoAdj(&g, 10);
 
     printf("%d", g.matriz[1][1]);
 
