@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #define MAXVER 100
 #define VERT_INVAL -1
@@ -67,3 +68,13 @@ int proxListaAdj(Grafo* g, int v, int atual) {
     }
     return VERT_INVAL;
 }
+
+void imprimeGrafo(Grafo* g) {
+    for (int i = 0; i < g->numVer; i++) {
+        for (int j = 0; j < g->numVer; j++) {
+            printf("%d ", g->matriz[i][j]);
+        }
+        printf("\n");
+    }
+}
+    
