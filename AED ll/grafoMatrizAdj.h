@@ -5,6 +5,8 @@
 #define MAXVER 100
 #define VERT_INVAL -1
 #define ARESTA_NULA -1
+
+typedef int ApontadorVertAdj;
 typedef int Peso;
 
 typedef struct
@@ -62,7 +64,12 @@ bool listaAdjVazia(Grafo* g, int v) {
     return true;
 }
 
-int proxListaAdj(Grafo* g, int v, int atual) {
+ApontadorVertAdj primeiroListaAdj(Grafo* g, int v) {
+    verificarVertice(g, v);
+    return proxListaAdj(g, v, -1);
+}
+
+ApontadorVertAdj proxListaAdj(Grafo* g, int v, ApontadorVertAdj atual) {
     for(int i = atual + 1; i < g->numVer; i++) {
         if(g->matriz[v][i] != ARESTA_NULA) return i;   
     }
