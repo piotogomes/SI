@@ -76,6 +76,8 @@ ApontadorVertAdj proxListaAdj(Grafo* g, int v, ApontadorVertAdj atual) {
     return VERT_INVAL;
 }
 
+void liberaGrafo(Grafo* g);
+
 void imprimeGrafo(Grafo* g) {
     for (int i = 0; i < g->numVer; i++) {
         for (int j = 0; j < g->numVer; j++) {

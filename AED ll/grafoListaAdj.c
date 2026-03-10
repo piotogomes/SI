@@ -59,30 +59,30 @@ void insereAresta(Grafo *g, int v1, int v2, Peso p)
     verificarVertice(g, v1);
     verificarVertice(g, v2);
     ApontadorVertAdj novo = (ApontadorVertAdj) malloc(sizeof(Aresta));
+    if(!novo) return;
     novo->p = p;
-    novo->prox = NULL;
     novo->vadj = v2;
-    g->listaAdj[v1]->prox = novo;
+    novo->prox = g->listaAdj[v1];
+    g->listaAdj[v1] = novo;
 
 }
 
 bool removerAresta(Grafo *g, int v1, int v2, Peso *p)
 {
-    if (!existeAresta(g, v1, v2))
-        return false;
     ApontadorVertAdj atual = g->listaAdj[v1];
     ApontadorVertAdj ant = NULL;
     while(atual) {
-        if (atual->vadj == v2) {
-            ant->prox = atual->prox;
-            *p = atual->p;
-            free(atual);
-            return true;
-        }
         ant = atual;
         atual = atual->prox;
     }
-    return false;
+    if (!atual) {
+        return false;
+    }
+    if(ant) ant->prox = atual->prox;
+    else g->listaAdj[v1] = atual->prox;
+    *p = atual->p;
+    free(atual);
+    return true;
 }
 
 bool listaAdjVazia(Grafo *g, int v)
@@ -104,6 +104,22 @@ ApontadorVertAdj proxListaAdj(Grafo *g, int v, ApontadorVertAdj atual)
     }
         return (atual->prox);
 }   
+
+void liberaGrafo(Grafo* g) {
+    for(int i = 0; i < g->numVer; i++) {
+        ApontadorVertAdj atual = g->listaAdj[i];
+        while(atual) {
+            g->listaAdj[i] = atual->prox;
+            atual->prox = NULL; // apagar o ponteiro pra ninguem hackear o.o
+            free(atual);
+            atual = g->listaAdj[i];
+        }
+    }
+
+    free(g->listaAdj);
+    g->listaAdj = NULL; // apagar o ponteiro pra ninguem hackear o.o
+    g->numVer = 0;
+}
 
 void imprimeGrafo(Grafo *g)
 {

@@ -5,8 +5,8 @@
 public class Example2 {                          // Class declaration
   int x;
 
-  Example2(int x) { 
-    this.x = x;                         // One-line body 
+  Example2(int valor) { 
+    x = valor;                         // One-line body 
   } 
 
   int sum(int y) {                      // Multi-line body
@@ -37,14 +37,5 @@ public class Example2 {                          // Class declaration
       return false;
     }
     return (day >= 1) && (day <= length);
-  }
-  Example2 exemplo = new Example2(-5);
-  public static void main(String[] args) {
-  
-    // int r;
-    // r = exemplo.sum(5);
-    // r = r + 20;
-    // System.out.println(r);
-  
   }
 }
