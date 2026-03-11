@@ -1,26 +1,9 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include "grafoAPI.h"
 
-#define MAXVER 100
 #define VERT_INVAL -1
 #define ARESTA_NULA NULL
 
-typedef int Peso;
-typedef Aresta* ApontadorVertAdj;
 
-typedef struct str
-{
-    int vadj;
-    Peso p; 
-    struct str *prox;
-} Aresta;
-
-typedef struct
-{
-    Aresta **listaAdj;
-    int numVer;
-} Grafo;
 
 void verificarVertice(Grafo *g, int v)
 {
@@ -30,10 +13,10 @@ void verificarVertice(Grafo *g, int v)
         exit(-1);
 }
 
-bool inicializarGrafoAdj(int numVer, Grafo *g)
+bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
-    verificarVertice(g, numVer);
     g->numVer = numVer;
+    verificarVertice(g, numVer);
     if (!(g->listaAdj = (Aresta **)calloc(numVer, sizeof(ApontadorVertAdj))))
         return false;
     return true;

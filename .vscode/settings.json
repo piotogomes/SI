@@ -4,5 +4,6 @@
         "BOT.C": "cpp",
         "stdio.h": "c",
         "stdbool.h": "c"
-    }
+    },
+    "cmake.sourceDirectory": "/home/rafael/Desktop/SI/AED ll"
 }

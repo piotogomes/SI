@@ -1,31 +1,17 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
+#include "grafoAPI.h"
 
-#define MAXVER 100
 #define VERT_INVAL -1
 #define ARESTA_NULA -1
 
-typedef int ApontadorVertAdj;
-typedef int Peso;
-
-typedef struct
-{
-
-    Peso matriz[MAXVER][MAXVER];
-    int numVer;
-
-} Grafo;
 
 void verificarVertice(Grafo* g, int v) {
     if(v < 0 || v > g->numVer) exit(-1);
-
 }
 
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
-    verificarVertice(g, numVer);
     g->numVer = numVer;
+    verificarVertice(g, numVer);
     for (int i = 0; i < numVer; i++)
     {
         for (int j = 0; j < numVer; j++)
@@ -63,18 +49,18 @@ bool listaAdjVazia(Grafo* g, int v) {
     }
     return true;
 }
-
-ApontadorVertAdj primeiroListaAdj(Grafo* g, int v) {
-    verificarVertice(g, v);
-    return proxListaAdj(g, v, -1);
-}
-
 ApontadorVertAdj proxListaAdj(Grafo* g, int v, ApontadorVertAdj atual) {
     for(int i = atual + 1; i < g->numVer; i++) {
         if(g->matriz[v][i] != ARESTA_NULA) return i;   
     }
     return VERT_INVAL;
 }
+
+ApontadorVertAdj primeiroListaAdj(Grafo* g, int v) {
+    verificarVertice(g, v);
+    return proxListaAdj(g, v, -1);
+}
+
 
 void liberaGrafo(Grafo* g);
 
