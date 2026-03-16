@@ -8,6 +8,7 @@
 typedef int Peso;
 
 #ifdef MATRIZ
+#define ARESTA_NULA -1
 typedef int ApontadorVertAdj;
 typedef struct 
 {
@@ -19,6 +20,8 @@ typedef struct
 #endif
 
 #ifdef LISTA
+
+#define ARESTA_NULA NULL
 typedef struct str
 {
     int vadj;
@@ -31,9 +34,11 @@ typedef struct
     Aresta **listaAdj;
     int numVer;
 } Grafo;
-
 typedef Aresta* ApontadorVertAdj;
+
 #endif
+
+int retornaVert(Grafo* g, )
 
 void verificarVertice(Grafo *g, int v);
 

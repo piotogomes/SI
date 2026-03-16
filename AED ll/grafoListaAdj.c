@@ -1,7 +1,7 @@
 #include "grafoAPI.h"
 
 #define VERT_INVAL -1
-#define ARESTA_NULA NULL
+
 
 
 
@@ -17,7 +17,7 @@ bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
     verificarVertice(g, numVer);
-    if (!(g->listaAdj = (Aresta **)calloc(numVer, sizeof(ApontadorVertAdj))))
+    if (!(g->listaAdj = (ApontadorVertAdj*) calloc(numVer, sizeof(ApontadorVertAdj))))
         return false;
     return true;
 }
