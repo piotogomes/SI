@@ -8,6 +8,11 @@ void verificarVertice(Grafo *g, int v)
         exit(-1);
 }
 
+int idVertice(Grafo *g, ApontadorVertAdj v)
+{
+    return v;
+}
+
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
@@ -30,7 +35,7 @@ bool existeAresta(Grafo *g, int v1, int v2)
 }
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
-{
+{       
     verificarVertice(g, v1);
     verificarVertice(g, v2);
     g->matriz[v1][v2] = p;
@@ -62,6 +67,7 @@ ApontadorVertAdj proxListaAdj(Grafo *g, int v, ApontadorVertAdj atual)
         if (g->matriz[v][i] != ARESTA_NULA)
             return i;
     }
+
     return VERT_INVAL;
 }
 
@@ -84,3 +90,5 @@ void imprimeGrafo(Grafo *g)
         printf("\n");
     }
 }
+
+bool existeCaminho(Grafo *g, int v1, int v2);

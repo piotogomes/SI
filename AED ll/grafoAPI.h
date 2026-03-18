@@ -38,9 +38,10 @@ typedef Aresta* ApontadorVertAdj;
 
 #endif
 
-int retornaVert(Grafo* g, )
 
 void verificarVertice(Grafo *g, int v);
+
+int idVertice(Grafo *g, ApontadorVertAdj v);
 
 bool inicializarGrafoAdj(Grafo *g, int numVer);
 
@@ -59,5 +60,18 @@ ApontadorVertAdj primeiroListaAdj(Grafo *g, int v);
 void liberaGrafo(Grafo *g);
 
 void imprimeGrafo(Grafo *g);
+
+
+bool existeCaminho(Grafo* g, int v1, int v2); // implementar
+
+void imprimeCaminho(int v1, int v2, int* ant); // implementar
+    // if v2 == v1 printf(v1) return
+    //else
+    //imprimeCaminho(v1, ant[v2], ant)
+    // printf(v2)
+
+bool grafoAciclico(Grafo* g); // implementar e imprimir um cliclo
+
+// ordenação topologica, lista decrescente em função do tempo de termino, implementar e imprimir
 
 #endif

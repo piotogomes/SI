@@ -13,6 +13,10 @@ void verificarVertice(Grafo *g, int v)
         exit(-1);
 }
 
+int idVertice(Grafo *g, ApontadorVertAdj v) {
+    return v->vadj;
+}
+
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
@@ -54,7 +58,7 @@ bool removerAresta(Grafo *g, int v1, int v2, Peso *p)
 {
     ApontadorVertAdj atual = g->listaAdj[v1];
     ApontadorVertAdj ant = NULL;
-    while(atual) {
+    while(idVertice(g, atual) != v2) {
         ant = atual;
         atual = atual->prox;
     }
@@ -122,3 +126,5 @@ void imprimeGrafo(Grafo *g)
         printf("\n");
     }
 }
+
+bool existeCaminho(Grafo* g, int v1, int v2);
