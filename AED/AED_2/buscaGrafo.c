@@ -1,6 +1,7 @@
 #include "grafoAPI.h"
+#include "../AED_1/listas.h"
 
-void visitaProfEC(Grafo *g, int v1, int v2, int *cor, int *desc, int *term, int *ant, int *tempo, bool *resp)
+void visitaProfCaminho(Grafo *g, int v1, int v2, int *cor, int *desc, int *term, int *ant, int *tempo, bool *resp)
 {
     cor[v1] = 1; // deixa cinza
     desc[v1] = ++(*tempo);
@@ -8,11 +9,10 @@ void visitaProfEC(Grafo *g, int v1, int v2, int *cor, int *desc, int *term, int 
     {
         if (cor[idVertice(g, u)] == 0)
         {
-            printf("vertice u: %d\n", idVertice(g,u)); 
             if (idVertice(g, u) == v2)
                 *resp = true;
             ant[idVertice(g, u)] = v1;
-            visitaProfEC(g, idVertice(g, u), v2, cor, desc, term, ant, tempo, resp);
+            visitaProfCaminho(g, idVertice(g, u), v2, cor, desc, term, ant, tempo, resp);
         }
     }
     term[v1] = ++(*tempo);
@@ -35,10 +35,65 @@ bool existeCaminho(Grafo *g, int v1, int v2)
         ant[i] = -1;
     }
     bool resp = false;
-    visitaProfEC(g, v1, v2, cor, desc, term, ant, &tempo, &resp);
-    if (resp) imprimeCaminho(v1, v2, ant);
+    visitaProfCaminho(g, v1, v2, cor, desc, term, ant, &tempo, &resp);
+    if (resp)
+    {
+        imprimeCaminho(v1, v2, ant);
+        printf("\n");
+    }
     return resp;
 }
+
+void visitaLarg(Grafo *g, int v, int *cor, int *dist, int *ant)
+{
+    cor[v] = 1; // deixa cinza
+    dist[v] = 0;
+    Fila *f;
+    fila_inicializar(f);
+    fila_anexar(f, v);
+    int w;
+    while (!fila_vazia(f))
+    {
+        w = fila_retornar(f);
+
+        for (ApontadorVertAdj u = primeiroListaAdj(g, w); u != ARESTA_NULA; u = proxListaAdj(g, w, u))
+        {
+            if (cor[idVertice(g, u)] == 0)
+            {
+                cor[idVertice(g, u)] == 1;
+                ant[idVertice(g, u)] == w;
+                dist[idVertice(g, u)] == dist[w] + 1;
+                fila_anexar(f, idVertice(g, u));
+            }
+        }
+        cor[w] = 2;
+    }
+}
+
+void menorCaminho(Grafo *g, int v1, int v2)
+{
+
+    // malloc dos vetores cor, descoberta, termino e anterior
+    int *cor = (int *)malloc(sizeof(int) * g->numVer); // 0 = branco, 1 = cinza, 2 = preto
+    int *dist = (int *)malloc(sizeof(int) * g->numVer);
+    int *ant = (int *)malloc(sizeof(int) * g->numVer);
+    for (int i = 0; i < g->numVer; i++)
+    {
+        cor[i] = 0;
+        ant[i] = -1;
+        dist[i] = 100000000; // max int
+    }
+    for (int i = 0; i < g->numVer; i++)
+    {
+        visitaLarg(g, i, cor, dist, ant);
+        printf("a\n");
+        if (i == v1)
+            break;
+    }
+    if (dist[v2] != 100000000)
+        imprimeCaminho(v1, v2, ant);
+}
+
 
 void imprimeCaminho(int v1, int v2, int ant[])
 {
@@ -47,27 +102,12 @@ void imprimeCaminho(int v1, int v2, int ant[])
         printf("%d ", v1);
         return;
     }
-    else {
+    else
+    {
         imprimeCaminho(v1, ant[v2], ant);
         printf("%d ", v2);
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 void visitaProf(Grafo *g, int v, int *cor, int *desc, int *term, int *ant, int *tempo)
@@ -87,6 +127,7 @@ void visitaProf(Grafo *g, int v, int *cor, int *desc, int *term, int *ant, int *
 }
 
 
+/*
 
 void buscaProfundidade(Grafo *g)
 {
@@ -111,3 +152,6 @@ void buscaProfundidade(Grafo *g)
         }
     }
 }
+
+
+*/

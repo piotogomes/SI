@@ -35,10 +35,18 @@ bool existeAresta(Grafo *g, int v1, int v2)
 }
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
-{       
+{
     verificarVertice(g, v1);
     verificarVertice(g, v2);
     g->matriz[v1][v2] = p;
+}
+
+void insereArestaND(Grafo *g, int v1, int v2, Peso p)
+{
+    verificarVertice(g, v1);
+    verificarVertice(g, v2);
+    g->matriz[v1][v2] = p;
+    g->matriz[v2][v1] = p;
 }
 
 bool removerAresta(Grafo *g, int v1, int v2, Peso *p)
@@ -81,14 +89,24 @@ void liberaGrafo(Grafo *g);
 
 void imprimeGrafo(Grafo *g)
 {
+    FILE *arq = fopen("grafo.dot", "w");
+    fprintf(arq, "digraph G { rankdir=LR; node [shape=rect, style=filled, color=lightblue];\n\n");
+
     for (int i = 0; i < g->numVer; i++)
     {
         for (int j = 0; j < g->numVer; j++)
         {
-            printf("%d ", g->matriz[i][j]);
-        }
-        printf("\n");
-    }
-}
+            if (g->matriz[i][j] != -1)
+            {
 
-bool existeCaminho(Grafo *g, int v1, int v2);
+                fprintf(arq, "%d -> %d [label="
+                             "%d"
+                             "];",
+                        i, j, g->matriz[i][j]);
+                fprintf(arq, "\n");
+            }
+        }
+    }
+    fprintf(arq, "}");
+    fclose(arq);
+}

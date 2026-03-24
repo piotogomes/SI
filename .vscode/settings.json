@@ -5,5 +5,7 @@
         "stdio.h": "c",
         "stdbool.h": "c"
     },
-    "cmake.sourceDirectory": "/home/rafael/Desktop/SI/AED ll"
+    "cmake.sourceDirectory": "/home/rafael/Desktop/SI/AED ll",
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc",
+    "C_Cpp.errorSquiggles": "enabled"
 }

@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Configuração de C",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/../"
+            ],
+            "defines": [
+                "LISTA",
+                "MATRIZ"
+            ],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

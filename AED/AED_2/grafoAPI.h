@@ -10,7 +10,7 @@ typedef int Peso;
 #ifdef MATRIZ
 #define ARESTA_NULA -1
 typedef int ApontadorVertAdj;
-typedef struct 
+typedef struct
 {
 
     Peso matriz[MAXVER][MAXVER];
@@ -29,15 +29,14 @@ typedef struct str
     struct str *prox;
 } Aresta;
 
-typedef struct 
+typedef struct
 {
     Aresta **listaAdj;
     int numVer;
 } Grafo;
-typedef Aresta* ApontadorVertAdj;
+typedef Aresta *ApontadorVertAdj;
 
 #endif
-
 
 void verificarVertice(Grafo *g, int v);
 
@@ -48,6 +47,8 @@ bool inicializarGrafoAdj(Grafo *g, int numVer);
 bool existeAresta(Grafo *g, int v1, int v2);
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p);
+
+void insereArestaND(Grafo *g, int v1, int v2, Peso p); // ND == não direcionado
 
 bool removerAresta(Grafo *g, int v1, int v2, Peso *p);
 
@@ -61,17 +62,20 @@ void liberaGrafo(Grafo *g);
 
 void imprimeGrafo(Grafo *g);
 
+bool existeCaminho(Grafo *g, int v1, int v2);
 
-bool existeCaminho(Grafo* g, int v1, int v2); // implementar
+void imprimeCaminho(int v1, int v2, int *ant);
 
-void imprimeCaminho(int v1, int v2, int* ant); // implementar
-    // if v2 == v1 printf(v1) return
-    //else
-    //imprimeCaminho(v1, ant[v2], ant)
-    // printf(v2)
+void menorCaminho(Grafo *g, int v1, int v2);
 
-bool grafoAciclico(Grafo* g); // implementar e imprimir um cliclo
+bool grafoAciclico(Grafo *g); // implementar e imprimir um cliclo
+
+bool grafoConexoND(Grafo *g);
+
+void visitaProf(Grafo *g, int v, int *cor, int *desc, int *term, int *ant, int *tempo);
 
 // ordenação topologica, lista decrescente em função do tempo de termino, implementar e imprimir
+
+// quantos componentes conectados e quais são eles
 
 #endif

@@ -69,8 +69,8 @@ NOSim *llds_busca(ListaLDS *l, int ch, NOSim **ant);
 bool llds_excluir(ListaLDS *l, int ch);
 bool llds_inserir(ListaLDS *l, int ch);
 
-// FILAS
 
+// FILAS
 typedef struct nf
 {
     int chave;
@@ -111,6 +111,7 @@ typedef struct
 void fila_inicializar(Fila *f);
 void fila_anexar(Fila *f, int ch);
 int fila_retornar(Fila *f);
+bool fila_vazia(Fila *f);
 void filaEst_inicializar(FilaEst *f);
 bool filaEst_anexar(FilaEst *f, int ch);
 int filaEst_retornar(FilaEst *f);

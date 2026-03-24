@@ -26,6 +26,10 @@ int fila_retornar(Fila* f) {
     return primeiro;
 }
 
+bool fila_vazia(Fila* f) {
+    return(f->inicio == NULL);
+}
+
 void filaEst_inicializar(FilaEst* f) {
     f->inicio = -1;
     f->fim = -1;
@@ -41,7 +45,7 @@ int filaEst_retornar(FilaEst* f) {
     if(f->inicio == -1) return -1;
     int aux =  f->A[f->inicio].chave;
     if(f->inicio == f->fim) {
-        fila_inicializar(f);
+        filaEst_inicializar(f);
     }
     f->inicio = (f->inicio + 1) % MAX;
     return aux;
