@@ -27,6 +27,7 @@ int idVertice(Grafo *g, ApontadorVertAdj v)
     return v;
 }
 
+
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
@@ -46,6 +47,13 @@ bool existeAresta(Grafo *g, int v1, int v2)
     verificarVertice(g, v1);
     verificarVertice(g, v2);
     return g->matriz[v1][v2] != ARESTA_NULA;
+}
+
+Peso pesoAresta(Grafo* g, int v1, int v2) {
+    verificarVertice(g, v1);
+    verificarVertice(g, v2);
+    if(!existeAresta(g, v1, v2)) return (Peso) -1;
+    return g->matriz[v1][v2];
 }
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
@@ -101,7 +109,32 @@ ApontadorVertAdj primeiroListaAdj(Grafo *g, int v)
 
 void liberaGrafo(Grafo *g);
 
-void imprimeGrafo(Grafo *g)
+void imprimeGrafoND(Grafo *g)
+// dot -Tpng grafo.dot -o imagem.png pra criar o png
+{
+    FILE *arq = fopen("grafo.dot", "w");
+    fprintf(arq, "strict graph G { rankdir=LR; node [shape=rect, style=filled, color=lightblue];\n\n");
+
+    for (int i = 0; i < g->numVer; i++)
+    {
+        for (int j = 0; j < g->numVer; j++)
+        {
+            if (g->matriz[i][j] != -1)
+            {
+
+                fprintf(arq, "%d -- %d [label="
+                             "%.2f"
+                             "];",
+                        i, j, g->matriz[i][j]);
+                fprintf(arq, "\n");
+            }
+        }
+    }
+    fprintf(arq, "}");
+    fclose(arq);
+}
+
+void imprimeGrafoDir(Grafo *g)
 // dot -Tpng grafo.dot -o imagem.png pra criar o png
 {
     FILE *arq = fopen("grafo.dot", "w");

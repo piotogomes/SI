@@ -2,64 +2,98 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-
 #define MAXVER 100
 
 // FILA EM FORMATO DE HEAP
 
-typedef struct s {
+typedef struct s
+{
     int heap[MAXVER];
+    int pos[MAXVER];
     int heapSize;
 } Heap;
 
+void trocar(Heap *h, int i, int j)
+{
+    int tempV = h->heap[i];
+    h->heap[i] = h->heap[j];
+    h->heap[j] = tempV;
 
-void minHeapify(Heap *h, int i) {
+    h->pos[h->heap[i]] = i;
+    h->pos[h->heap[j]] = j;
+}
+
+void minHeapify(Heap *h, int i, Peso chPeso[])
+{
     int l = 2 * i;
     int r = (2 * i) + 1;
     int min;
-    if(l < h->heapSize && h->heap[l] < h->heap[i]) {
+    if (l <= h->heapSize && chPeso[h->heap[l]] < chPeso[h->heap[i]])
+    {
         min = l;
     }
-    else min = i;
-    if(l < h->heapSize && h->heap[r] < h->heap[i]) {
+    else
+        min = i;
+    if (r <= h->heapSize && chPeso[h->heap[r]] < chPeso[h->heap[min]])
+    {
         min = r;
     }
-    if(min != i) {
-        int aux = h->heap[min];
-        h->heap[min] = i;
-        h->heap[i] = aux;
-        minHeapify(h, min);
+    if (min != i)
+    {
+        trocar(h, i, min);
+        minHeapify(h, min, chPeso);
+    }
+}
+
+bool pertenceFila(Heap *h, int v)
+{
+    return h->pos[v] >= 1 && h->pos[v] <= h->heapSize;
+}
+
+void subirMin(Heap *h, int i, Peso chPeso[])
+{
+
+    while (i > 1 && chPeso[h->heap[i]] < chPeso[h->heap[i / 2]])
+    {
+        trocar(h, i, i / 2);
+        i = i / 2;
+    }
+}
+
+void criarFila(Heap *h, int numVer)
+{
+    h->heapSize = numVer;
+    for (int i = 0; i < numVer; i++)
+    {
+        h->heap[i + 1] = i;
+        h->pos[i] = i + 1;
     }
 }
 
 
-void subirMin(Heap *h, int i) {
-    while(i > 1 && h->heap[i] < h->heap[i/2]) {
-        int aux = h->heap[i];
-        h->heap[i] = h->heap[i/2];
-        h->heap[i/2] = aux;
-        i = i/2;
-    }
+int posNaFila(Heap *h, int v) {
+    return h->pos[v];
 }
 
-void criarFila(Heap *h) {
-    h->heapSize = MAXVER;
-    for(int i = MAXVER / 2; i >= 1; i--) {
-        minHeapify(h, i);
-    }
+int tamFila(Heap *h)
+{
+    return h->heapSize;
 }
 
-
-
-int extrairFila(Heap* h) {
-    if(h->heapSize < 1) return -1;
+int extrairFila(Heap *h, Peso chPeso[])
+{
+    // if(h->heapSize < 1) return -1;
     int min = h->heap[1];
-    h->heap[1] = h->heap[MAXVER - 1];
+    h->pos[min] = -1;
+    h->heap[1] = h->heap[h->heapSize];
+    if (h->heapSize > 1)
+    {
+        h->pos[h->heap[1]] = 1;
+    }
     h->heapSize--;
-    minHeapify(h, 1);
+    minHeapify(h, 1, chPeso);
     return min;
 }
-
 
 // FUNÇÕES ADICIONAIS PARA GRAFOS
 
@@ -97,79 +131,11 @@ bool grafoConexoND(Grafo *g)
     visitaProf(g, 0, cor, desc, term, ant, &tempo);
     for (int i = 0; i < g->numVer; i++)
     {
-        printf("vert: %d   cor: %d\n", i, cor[i]);   
-        if (cor[i] != 2) {
+        // printf("vert: %d   cor: %d\n", i, cor[i]);
+        if (cor[i] != 2)
+        {
             return false;
         }
     }
     return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-// Manutenção do Min-Heap (Sobe o menor)
-void subir_min(int *heap, int i)
-{
-    while (i > 0 && heap[i] < heap[(i - 1) / 2])
-    {
-        int temp = heap[i];
-        heap[i] = heap[(i - 1) / 2];
-        heap[(i - 1) / 2] = temp;
-        i = (i - 1) / 2;
-    }
-}
-
-// Manutenção do Min-Heap (Desce o maior/errado)
-void descer_min(int *heap, int n, int i)
-{
-    int menor = i;
-    int esq = 2 * i + 1;
-    int dir = 2 * i + 2;
-
-    if (esq < n && heap[esq] < heap[menor])
-        menor = esq;
-    if (dir < n && heap[dir] < heap[menor])
-        menor = dir;
-
-    if (menor != i)
-    {
-        int temp = heap[i];
-        heap[i] = heap[menor];
-        heap[menor] = temp;
-        descer_min(heap, n, menor);
-    }
-}
-
-// Operações da Fila
-void inserir(int *heap, int *n, int valor)
-{
-    heap[*n] = valor;
-    (*n)++;
-    subir_min(heap, *n - 1);
-}
-
-int extrair_minimo(int *heap, int *n)
-{
-
-    int minimo = heap[0];
-    heap[0] = heap[*n - 1];
-    (*n)--;
-    descer_min(heap, *n, 0);
-    return minimo;
-}
-
-*/

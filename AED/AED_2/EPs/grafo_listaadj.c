@@ -60,6 +60,18 @@ bool existeAresta(Grafo *g, int v1, int v2)
     return ARESTA_NULA;
 }
 
+Peso pesoAresta(Grafo* g, int v1, int v2) {
+    verificarVertice(g, v1);
+    verificarVertice(g, v2);
+    if(!existeAresta(g, v1, v2)) return (Peso) -1;
+    ApontadorVertAdj atual = g->listaAdj[v1];
+    while (idVertice(g, atual) != v2)
+    {
+        atual = atual->prox;
+    }
+    return atual->p;
+}
+
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
 {
     verificarVertice(g, v1);
@@ -163,7 +175,34 @@ void liberaGrafo(Grafo *g)
     g->numVer = 0;
 }
 
-void imprimeGrafo(Grafo *g)
+
+// dot -Tpng grafo.dot -o imagem.png pra criar o png
+void imprimeGrafoND(Grafo *g)
+{
+
+    ApontadorVertAdj atual;
+    FILE *arq = fopen("grafo.dot", "w");
+    fprintf(arq, "strict graph G { rankdir=LR; node [shape=rect, style=filled, color=lightblue];\n\n");
+
+    for (int i = 0; i < g->numVer; i++)
+    {
+        atual = g->listaAdj[i];
+        while (atual)
+        {
+
+            fprintf(arq, "%d -- %d [label="
+                         "%.2f"
+                         "];",
+                    i, atual->vadj, atual->p);
+            fprintf(arq, "\n");
+            atual = atual->prox;
+        }
+    }
+    fprintf(arq, "}");
+    fclose(arq);
+}
+
+void imprimeGrafoDir(Grafo *g)
 {
 
     ApontadorVertAdj atual;
@@ -175,6 +214,7 @@ void imprimeGrafo(Grafo *g)
         atual = g->listaAdj[i];
         while (atual)
         {
+
             fprintf(arq, "%d -> %d [label="
                          "%.2f"
                          "];",
