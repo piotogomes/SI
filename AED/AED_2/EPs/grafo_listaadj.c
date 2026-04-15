@@ -21,12 +21,13 @@ typedef struct
 } Grafo;
 typedef Aresta *ApontadorVertAdj;
 
-void verificarVertice(Grafo *g, int v)
+bool verificarVertice(Grafo *g, int v)
 {
     if (!g)
-        exit(-1);
+        return false;
     if (v < 0 || v > g->numVer)
-        exit(-1);
+        return false;
+    return true;
 }
 
 int idVertice(Grafo *g, ApontadorVertAdj v)
@@ -37,7 +38,10 @@ int idVertice(Grafo *g, ApontadorVertAdj v)
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
-    verificarVertice(g, numVer);
+    if (!verificarVertice(g, numVer))
+    {
+        return false;
+    }
     if (!(g->listaAdj = (ApontadorVertAdj *)calloc(numVer, sizeof(ApontadorVertAdj))))
         return false;
     return true;
@@ -45,8 +49,9 @@ bool inicializarGrafoAdj(Grafo *g, int numVer)
 
 bool existeAresta(Grafo *g, int v1, int v2)
 {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2)){
+        return false;
+    }
     ApontadorVertAdj atual = g->listaAdj[v1];
     while (atual)
     {
@@ -57,13 +62,13 @@ bool existeAresta(Grafo *g, int v1, int v2)
         atual = atual->prox;
     }
 
-    return ARESTA_NULA;
+    return false;
 }
 
-Peso pesoAresta(Grafo* g, int v1, int v2) {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
-    if(!existeAresta(g, v1, v2)) return (Peso) -1;
+Peso pesoAresta(Grafo *g, int v1, int v2)
+{
+    if (!existeAresta(g, v1, v2))
+        return (Peso)-1;
     ApontadorVertAdj atual = g->listaAdj[v1];
     while (idVertice(g, atual) != v2)
     {
@@ -74,8 +79,8 @@ Peso pesoAresta(Grafo* g, int v1, int v2) {
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
 {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2))
+        return;
     if (existeAresta(g, v1, v2))
         return;
     ApontadorVertAdj novo = (ApontadorVertAdj)malloc(sizeof(Aresta));
@@ -89,12 +94,7 @@ void insereAresta(Grafo *g, int v1, int v2, Peso p)
 
 void insereArestaND(Grafo *g, int v1, int v2, Peso p)
 {
-
-    if (v1 == v2)
-        return;
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
-    if (existeAresta(g, v1, v2))
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2))
         return;
     ApontadorVertAdj novo1 = (ApontadorVertAdj)malloc(sizeof(Aresta));
     if (!novo1)
@@ -137,13 +137,13 @@ bool removerAresta(Grafo *g, int v1, int v2, Peso *p)
 
 bool listaAdjVazia(Grafo *g, int v)
 {
-    verificarVertice(g, v);
+    if (!verificarVertice(g, v))
+        return false;
     return (g->listaAdj[v] == NULL);
 }
 
 ApontadorVertAdj primeiroListaAdj(Grafo *g, int v)
 {
-    verificarVertice(g, v);
     return g->listaAdj[v];
 }
 
@@ -164,17 +164,16 @@ void liberaGrafo(Grafo *g)
         while (atual)
         {
             g->listaAdj[i] = atual->prox;
-            atual->prox = NULL; 
+            atual->prox = NULL;
             free(atual);
             atual = g->listaAdj[i];
         }
     }
 
     free(g->listaAdj);
-    g->listaAdj = NULL; 
+    g->listaAdj = NULL;
     g->numVer = 0;
 }
-
 
 // dot -Tpng grafo.dot -o imagem.png pra criar o png
 void imprimeGrafoND(Grafo *g)

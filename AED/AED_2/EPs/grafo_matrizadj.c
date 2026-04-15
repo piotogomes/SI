@@ -16,10 +16,13 @@ typedef struct
 
 #define VERT_INVAL -1
 
-void verificarVertice(Grafo *g, int v)
+bool verificarVertice(Grafo *g, int v)
 {
+    if (!g)
+        return false;
     if (v < 0 || v > g->numVer)
-        exit(-1);
+        return false;
+    return true;
 }
 
 int idVertice(Grafo *g, ApontadorVertAdj v)
@@ -27,11 +30,13 @@ int idVertice(Grafo *g, ApontadorVertAdj v)
     return v;
 }
 
-
 bool inicializarGrafoAdj(Grafo *g, int numVer)
 {
     g->numVer = numVer;
-    verificarVertice(g, numVer);
+    if (!verificarVertice(g, numVer))
+    {
+        return false;
+    }
     for (int i = 0; i < numVer; i++)
     {
         for (int j = 0; j < numVer; j++)
@@ -44,29 +49,29 @@ bool inicializarGrafoAdj(Grafo *g, int numVer)
 
 bool existeAresta(Grafo *g, int v1, int v2)
 {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2))
+        return false;
     return g->matriz[v1][v2] != ARESTA_NULA;
 }
 
-Peso pesoAresta(Grafo* g, int v1, int v2) {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
-    if(!existeAresta(g, v1, v2)) return (Peso) -1;
+Peso pesoAresta(Grafo *g, int v1, int v2)
+{
+    if (!existeAresta(g, v1, v2))
+        return (Peso)-1;
     return g->matriz[v1][v2];
 }
 
 void insereAresta(Grafo *g, int v1, int v2, Peso p)
 {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2))
+        return;
     g->matriz[v1][v2] = p;
 }
 
 void insereArestaND(Grafo *g, int v1, int v2, Peso p)
 {
-    verificarVertice(g, v1);
-    verificarVertice(g, v2);
+    if (!verificarVertice(g, v1) || !verificarVertice(g, v2))
+        return;
     g->matriz[v1][v2] = p;
     g->matriz[v2][v1] = p;
 }
@@ -82,7 +87,8 @@ bool removerAresta(Grafo *g, int v1, int v2, Peso *p)
 
 bool listaAdjVazia(Grafo *g, int v)
 {
-    verificarVertice(g, v);
+    if (!verificarVertice(g, v))
+        return false;
     for (int i = 0; i < g->numVer; i++)
     {
         if (g->matriz[v][i] != ARESTA_NULA)
@@ -103,7 +109,6 @@ ApontadorVertAdj proxListaAdj(Grafo *g, int v, ApontadorVertAdj atual)
 
 ApontadorVertAdj primeiroListaAdj(Grafo *g, int v)
 {
-    verificarVertice(g, v);
     return proxListaAdj(g, v, -1);
 }
 

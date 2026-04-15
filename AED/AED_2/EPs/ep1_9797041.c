@@ -23,14 +23,21 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
         }
     }
     fprintf(saida, "%.1f\n%d\n", soma, ult);
+
     for (int i = 0; i < g->numVer; i++)
     {
-        for (ApontadorVertAdj u = primeiroListaAdj(&agm, i); u != ARESTA_NULA; u = proxListaAdj(&agm, i, u))
+        for (int j = 1; j < g->numVer; j++)
         {
-
-            if (i < idVertice(&agm, u))
+            if (ant[j] == i)
             {
-                fprintf(saida, "%d %d %.1f\n", i, idVertice(&agm, u), pesoAresta(g, i, idVertice(&agm, u)));
+                if (i < j)
+                {
+                    fprintf(saida, "%d %d %.1f\n", i, j, pesoAresta(g, i, j));
+                }
+                else
+                {
+                    fprintf(saida, "%d %d %.1f\n", j, i, pesoAresta(g, i, j));
+                }
             }
         }
     }
@@ -74,9 +81,11 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
     *resp = ant;
 }
 
-bool verifica_validade_vertice(Grafo *g, int v)
+bool verifica_validade_vertice(int v, int numVer)
 {
-    return false ? (v < 0 || v > g->numVer) : true;
+    if(v < 0) return false;
+    if(v >= numVer) return false;
+    return true;
 }
 
 bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
@@ -88,27 +97,40 @@ bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
         int v1, v2;
         Peso p;
         fscanf(entrada, "%d %d %f", &v1, &v2, &p);
-        if (!verifica_validade_vertice(g, v1))
+        if (!verifica_validade_vertice(v1, v))
         {
             fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n", v1);
+            resp = false;
         }
-        if (!verifica_validade_vertice(g, v2))
+        if (!verifica_validade_vertice(v2, v))
         {
             fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n", v2);
+            resp = false;
         }
         if (v1 == v2)
         {
             fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1, v2);
+            resp = false;
         }
-        if (existeAresta(&g, v1, v2))
+        
+        if (existeAresta(g, v1, v2))
         {
-            fprintf(saida, "ERRO: ARESTA PARALELA\n");
+            if (v1 < v2)
+            fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
+            else
+            fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
+            resp = false;
         }
         if (p <= 0)
         {
-            fprintf(saida, "ERRO: PESO INVALIDO\n");
+            fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
+            resp = false;
+        }
+        if (verifica_validade_vertice(v1, v) && verifica_validade_vertice(v2, v)) {
+            insereArestaND(g, v1, v2, p);
         }
     }
+    return resp;
 }
 
 int main(int argc, char *argv[])
@@ -125,52 +147,60 @@ int main(int argc, char *argv[])
     fscanf(entrada, "%d %d", &v, &a);
 
     inicializarGrafoAdj(&g, v);
+    bool sucesso = le_grafo(entrada, saida, &g, v, a);
 
-    for (int i = a; i > 0; i--)
+    // for (int i = a; i > 0; i--)
+    // {
+    //     int v1, v2;
+    //     Peso p;
+    //     fscanf(entrada, "%d %d %f", &v1, &v2, &p);
+    //     if (v1 < 0 || v1 >= v)
+    //     {
+    //         fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v1");
+    //         erro = true;
+    //     }
+    //     if (v2 < 0 || v2 >= v)
+    //     {
+    //         fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v2");
+    //         erro = true;
+    //     }
+    //     if (v1 == v2)
+    //     {
+    //         fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1);
+    //         erro = true;
+    //     }
+    //     if (existeAresta(&g, v1, v2))
+    //     {
+    //         erro = true;
+    //         if (v1 > v2)
+    //             fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
+    //         else
+    //             fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
+    //     }
+    //     if (p <= 0)
+    //     {
+    //         fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
+    //         erro = true;
+    //     }
+    //     insereArestaND(&g, v1, v2, p);
+    // }
+
+    if (sucesso && !grafoConexoND(&g))
     {
-        int v1, v2;
-        Peso p;
-        fscanf(entrada, "%d %d %f", &v1, &v2, &p);
-        if (v1 < 0 || v1 >= v)
-        {
-            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v1");
-            erro = true;
-        }
-        if (v2 < 0 || v2 >= v)
-        {
-            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v2");
-            erro = true;
-        }
-        if (v1 == v2)
-        {
-            fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1);
-            erro = true;
-        }
-        if (existeAresta(&g, v1, v2))
-        {
-            erro = true;
-            if(v1 > v2) fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
-            else fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
-        }
-        if (p <= 0)
-        {
-            fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
-            erro = true;
-        }
-        insereArestaND(&g, v1, v2, p);
-    }
-    if (!erro && !grafoConexoND(&g))
-    {
-        fopen(argv[2], "w"); // deixa em branco
+        // fopen(argv[2], "w"); // deixa em branco
         fprintf(saida, "ERRO: GRAFO NAO CONECTADO\n");
         return -1;
     }
 
-    agmPrim(&g, 0, &resp, &ult);
+    if (sucesso && grafoConexoND)
+    {
+        agmPrim(&g, 0, &resp, &ult);
+        imprimirArq(&g, saida, resp, ult);
+    }
     // imprimeGrafoND(&g);
-
-    imprimirArq(&g, saida, resp, ult);
 
     fclose(entrada);
     fclose(saida);
+
+    return 0;
 }
