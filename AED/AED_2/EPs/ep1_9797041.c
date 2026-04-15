@@ -9,22 +9,10 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/* função para imprimir na saida corretamente
-    cria o grafo já agm e percorre os vertices e seus adjacentes
-*/
+// função para imprimir na saida corretamente
+
 void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
 {
-
-    Grafo agm;
-    inicializarGrafoAdj(&agm, g->numVer);
-
-    for (int i = 0; i < g->numVer; i++)
-    {
-        if (ant[i] != -1)
-            insereArestaND(&agm, i, ant[i], (pesoAresta(g, i, ant[i])));
-    }
-
-    imprimeGrafoND(&agm);
 
     float soma = 0;
     for (int i = 0; i < g->numVer; i++)
@@ -39,12 +27,11 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
     {
         for (ApontadorVertAdj u = primeiroListaAdj(&agm, i); u != ARESTA_NULA; u = proxListaAdj(&agm, i, u))
         {
-            
+
             if (i < idVertice(&agm, u))
             {
                 fprintf(saida, "%d %d %.1f\n", i, idVertice(&agm, u), pesoAresta(g, i, idVertice(&agm, u)));
             }
-
         }
     }
 }
@@ -85,6 +72,43 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
         }
     }
     *resp = ant;
+}
+
+bool verifica_validade_vertice(Grafo *g, int v)
+{
+    return false ? (v < 0 || v > g->numVer) : true;
+}
+
+bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
+{
+
+    bool resp = true;
+    for (int i = a; i > 0; i--)
+    {
+        int v1, v2;
+        Peso p;
+        fscanf(entrada, "%d %d %f", &v1, &v2, &p);
+        if (!verifica_validade_vertice(g, v1))
+        {
+            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n", v1);
+        }
+        if (!verifica_validade_vertice(g, v2))
+        {
+            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n", v2);
+        }
+        if (v1 == v2)
+        {
+            fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1, v2);
+        }
+        if (existeAresta(&g, v1, v2))
+        {
+            fprintf(saida, "ERRO: ARESTA PARALELA\n");
+        }
+        if (p <= 0)
+        {
+            fprintf(saida, "ERRO: PESO INVALIDO\n");
+        }
+    }
 }
 
 int main(int argc, char *argv[])
