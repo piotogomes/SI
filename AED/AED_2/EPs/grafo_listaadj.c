@@ -164,14 +164,14 @@ void liberaGrafo(Grafo *g)
         while (atual)
         {
             g->listaAdj[i] = atual->prox;
-            atual->prox = NULL; // apagar o ponteiro pra ninguem hackear o.o
+            atual->prox = NULL; 
             free(atual);
             atual = g->listaAdj[i];
         }
     }
 
     free(g->listaAdj);
-    g->listaAdj = NULL; // apagar o ponteiro pra ninguem hackear o.o
+    g->listaAdj = NULL; 
     g->numVer = 0;
 }
 

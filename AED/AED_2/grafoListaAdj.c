@@ -2,6 +2,7 @@
 
 #define VERT_INVAL -1
 
+
 void verificarVertice(Grafo *g, int v)
 {
     if (!g)

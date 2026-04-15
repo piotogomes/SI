@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
     int a;
     int *resp;
     int ult;
+    bool erro = false;
     Grafo g;
     fscanf(entrada, "%d %d", &v, &a);
 
@@ -130,34 +131,41 @@ int main(int argc, char *argv[])
         int v1, v2;
         Peso p;
         fscanf(entrada, "%d %d %f", &v1, &v2, &p);
-        if (p <= 0)
+        if (v1 < 0 || v1 >= v)
         {
-            fprintf(saida, "ERRO: PESO INVALIDO\n");
-            continue;
+            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v1");
+            erro = true;
         }
-        if (existeAresta(&g, v1, v2))
+        if (v2 < 0 || v2 >= v)
         {
-            fprintf(saida, "ERRO: ARESTA PARALELA\n");
-            continue;
+            fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v2");
+            erro = true;
         }
         if (v1 == v2)
         {
-            fprintf(saida, "ERRO: AUTO-LACO\n");
-            continue;
+            fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1);
+            erro = true;
         }
-        if (v1 < 0 || v2 < 0 || v1 >= v || v2 >= v)
+        if (existeAresta(&g, v1, v2))
         {
-            fprintf(saida, "ERRO: VERTICE INVALIDO\n");
-            continue;
+            erro = true;
+            if(v1 > v2) fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
+            else fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
+        }
+        if (p <= 0)
+        {
+            fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
+            erro = true;
         }
         insereArestaND(&g, v1, v2, p);
     }
-    if (!grafoConexoND(&g))
+    if (!erro && !grafoConexoND(&g))
     {
         fopen(argv[2], "w"); // deixa em branco
         fprintf(saida, "ERRO: GRAFO NAO CONECTADO\n");
         return -1;
     }
+
     agmPrim(&g, 0, &resp, &ult);
     // imprimeGrafoND(&g);
 
