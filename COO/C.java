@@ -12,7 +12,7 @@ public class C{
 
 
 
-public class A {
+class A {
 	int x = 2;
 
 	public String toString() {
