@@ -23,10 +23,11 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
         }
     }
     fprintf(saida, "%.1f\n%d\n", soma, ult);
-
+    int aux[g->numVer];
+    // criar ordenação
     for (int i = 0; i < g->numVer; i++)
     {
-        for (int j = 1; j < g->numVer; j++)
+        for (int j = 0; j < g->numVer; j++)
         {
             if (ant[j] == i)
             {
