@@ -48,7 +48,7 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
     Peso chPeso[g->numVer];
     int ant[g->numVer];
     Heap fila;
-    criarFila(&fila, g->numVer);
+    criarFila(&fila, g->numVer); // cria o heap
 
     for (int i = 0; i < g->numVer; i++)
     {
@@ -57,14 +57,14 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
     }
     chPeso[raiz] = 0;
     ant[raiz] = -1;
-    subirMin(&fila, posNaFila(&fila, raiz), chPeso);
+    subirMin(&fila, posNaFila(&fila, raiz), chPeso); // atualiza a raiz no heap
 
     while (tamFila(&fila) > 0)
     {
         int v = extrairFila(&fila, chPeso);
         if (tamFila(&fila) == 0)
         {
-            *ult = v;
+            *ult = v; // salva o ultimo
         }
         for (ApontadorVertAdj u = primeiroListaAdj(g, v); u != ARESTA_NULA; u = proxListaAdj(g, v, u))
         {
@@ -78,7 +78,7 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
             }
         }
     }
-    *resp = ant;
+    *resp = ant; // arestas agm
 }
 
 bool verifica_validade_vertice(int v, int numVer)
@@ -149,45 +149,8 @@ int main(int argc, char *argv[])
     inicializarGrafoAdj(&g, v);
     bool sucesso = le_grafo(entrada, saida, &g, v, a);
 
-    // for (int i = a; i > 0; i--)
-    // {
-    //     int v1, v2;
-    //     Peso p;
-    //     fscanf(entrada, "%d %d %f", &v1, &v2, &p);
-    //     if (v1 < 0 || v1 >= v)
-    //     {
-    //         fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v1");
-    //         erro = true;
-    //     }
-    //     if (v2 < 0 || v2 >= v)
-    //     {
-    //         fprintf(saida, "ERRO: VERTICE INVALIDO (%d)\n, v2");
-    //         erro = true;
-    //     }
-    //     if (v1 == v2)
-    //     {
-    //         fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1);
-    //         erro = true;
-    //     }
-    //     if (existeAresta(&g, v1, v2))
-    //     {
-    //         erro = true;
-    //         if (v1 > v2)
-    //             fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
-    //         else
-    //             fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
-    //     }
-    //     if (p <= 0)
-    //     {
-    //         fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
-    //         erro = true;
-    //     }
-    //     insereArestaND(&g, v1, v2, p);
-    // }
-
     if (sucesso && !grafoConexoND(&g))
     {
-        // fopen(argv[2], "w"); // deixa em branco
         fprintf(saida, "ERRO: GRAFO NAO CONECTADO\n");
         return -1;
     }
@@ -197,7 +160,6 @@ int main(int argc, char *argv[])
         agmPrim(&g, 0, &resp, &ult);
         imprimirArq(&g, saida, resp, ult);
     }
-    // imprimeGrafoND(&g);
 
     fclose(entrada);
     fclose(saida);
