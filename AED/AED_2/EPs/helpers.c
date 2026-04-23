@@ -70,8 +70,8 @@ void criarFila(Heap *h, int numVer)
     }
 }
 
-
-int posNaFila(Heap *h, int v) {
+int posNaFila(Heap *h, int v)
+{
     return h->pos[v];
 }
 
@@ -97,19 +97,33 @@ int extrairFila(Heap *h, Peso chPeso[])
 
 // FUNÇÕES ADICIONAIS PARA GRAFOS
 
-void visitaProf(Grafo *g, int v, int *cor, int *desc, int *term, int *ant, int *tempo)
+void visitaProfDistancia(Grafo *g, int v, int d, int *dist, int *cor, int *ant)
 {
+
     cor[v] = 1; // deixa cinza
-    desc[v] = ++(*tempo);
+    dist[v] = d;
     for (ApontadorVertAdj u = primeiroListaAdj(g, v); u != ARESTA_NULA; u = proxListaAdj(g, v, u))
     {
         if (cor[idVertice(g, u)] == 0)
         {
             ant[idVertice(g, u)] = v;
-            visitaProf(g, idVertice(g, u), cor, desc, term, ant, tempo);
+            visitaProfDistancia(g, idVertice(g, u), d + pesoAresta(g, idVertice(g,u), v), dist, cor, ant);
         }
     }
-    term[v] = ++(*tempo);
+    cor[v] = 2;
+}
+
+void visitaProfConexo(Grafo *g, int v, int *cor, int *ant)
+{
+    cor[v] = 1; // deixa cinza
+    for (ApontadorVertAdj u = primeiroListaAdj(g, v); u != ARESTA_NULA; u = proxListaAdj(g, v, u))
+    {
+        if (cor[idVertice(g, u)] == 0)
+        {
+            ant[idVertice(g, u)] = v;
+            visitaProfConexo(g, idVertice(g, u), cor, ant);
+        }
+    }
     cor[v] = 2;
 }
 
@@ -117,25 +131,40 @@ bool grafoConexoND(Grafo *g)
 {
 
     int *cor = (int *)malloc(sizeof(int) * g->numVer); // 0 = branco, 1 = cinza, 2 = preto
-    int *desc = (int *)malloc(sizeof(int) * g->numVer);
-    int *term = (int *)malloc(sizeof(int) * g->numVer);
     int *ant = (int *)malloc(sizeof(int) * g->numVer);
-    int tempo = 0;
-
     for (int i = 0; i < g->numVer; i++)
     {
-        cor[i] = desc[i] = term[i] = 0;
+        cor[i] = 0;
         ant[i] = -1;
     }
 
-    visitaProf(g, 0, cor, desc, term, ant, &tempo);
+    visitaProfConexo(g, 0, cor, ant);
     for (int i = 0; i < g->numVer; i++)
     {
-        // printf("vert: %d   cor: %d\n", i, cor[i]);
         if (cor[i] != 2)
         {
             return false;
         }
     }
     return true;
+}
+
+int verticeMaisLonge(Grafo *g)
+{
+    int *dist = (int *)malloc(sizeof(int) * g->numVer);
+    int *cor = (int *)malloc(sizeof(int) * g->numVer); // 0 = branco, 1 = cinza, 2 = preto
+    int *ant = (int *)malloc(sizeof(int) * g->numVer);
+    visitaProfDistancia(g, 0, 0, dist, cor, ant);
+    int v = 0;
+    int maiorDist = -1;
+
+    for (int i = 0; i < g->numVer; i++)
+    {
+        if (dist[i] > maiorDist)
+        {
+            maiorDist = dist[i];
+            v = i;
+        }
+    }
+    return v;
 }

@@ -11,48 +11,74 @@
 
 // função para imprimir na saida corretamente
 
-typedef struct a {
-    int menor;
-    int maior;
-} ArestaAGM;
-
-void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
+void imprimirArq(Grafo *g, FILE *saida, int ant[])
 {
-
+    Grafo agm;
+    inicializarGrafoAdj(&agm, g->numVer);
+    for (int i = 1; i < g->numVer; i++)
+    {
+        insereArestaND(&agm, i, ant[i], pesoAresta(g, i, ant[i]));
+    }
     float soma = 0;
+    int aux[g->numVer];
+    int maisLonge = verticeMaisLonge(&agm);
     for (int i = 0; i < g->numVer; i++)
     {
         if (ant[i] != -1)
         {
             soma += (pesoAresta(g, i, ant[i]));
         }
+        aux[i] = ant[i];
     }
-    fprintf(saida, "%.1f\n%d\n", soma, ult);
-    ArestaAGM aux[g->numVer];
+    fprintf(saida, "%.1f\n%d\n", soma, maisLonge);
     // criar ordenação
-    for (int i = 0; i < g->numVer; i++)
+    int orderIndex[g->numVer - 1];
+    for (int i = 0; i < g->numVer - 1; i++)
     {
-        for (int j = 0; j < g->numVer; j++)
+        int menor = __INT_MAX__;
+        for (int j = 1; j < g->numVer; j++)
         {
-            if (ant[j] == i)
+            // percorre valores
+            if (aux[j] < menor)
             {
-                if (i < j)
+                menor = aux[j];
+            }
+            // percorre indices
+            if (j < menor)
+            {
+                if (aux[j] != __INT_MAX__)
                 {
-                    fprintf(saida, "%d %d %.1f\n", i, j, pesoAresta(g, i, j));
-                }
-                else
-                {
-                    fprintf(saida, "%d %d %.1f\n", j, i, pesoAresta(g, i, j));
+                    menor = j;
                 }
             }
+        }
+        for (int j = 1; j < g->numVer; j++)
+        {
+            if ((aux[j] != __INT_MAX__) && ((aux[j] == menor) || (j == menor)))
+            {
+                orderIndex[i] = j;
+                aux[j] = __INT_MAX__;
+                break;
+            }
+        }
+    }
+    for (int i = 0; i < g->numVer - 1; i++)
+    {
+        if (ant[orderIndex[i]] < orderIndex[i])
+        {
+            fprintf(saida, "%d %d %.1f\n", ant[orderIndex[i]], orderIndex[i], pesoAresta(g, ant[orderIndex[i]], orderIndex[i]));
+        }
+        else
+        {
+            fprintf(saida, "%d %d %.1f\n", orderIndex[i], ant[orderIndex[i]], pesoAresta(g, ant[orderIndex[i]], orderIndex[i]));
         }
     }
 }
 
-int* agmPrim(Grafo *g, int raiz, int *ult)
+int *agmPrim(Grafo *g, int raiz)
 {
     Peso chPeso[g->numVer];
-    int* ant = malloc(sizeof(int) * g->numVer);
+    int *ant = malloc(sizeof(int) * g->numVer);
     Heap fila;
     criarFila(&fila, g->numVer); // cria o heap
 
@@ -68,10 +94,6 @@ int* agmPrim(Grafo *g, int raiz, int *ult)
     while (tamFila(&fila) > 0)
     {
         int v = extrairFila(&fila, chPeso);
-        if (tamFila(&fila) == 0)
-        {
-            *ult = v; // salva o ultimo
-        }
         for (ApontadorVertAdj u = primeiroListaAdj(g, v); u != ARESTA_NULA; u = proxListaAdj(g, v, u))
         {
             int t = idVertice(g, u);
@@ -142,6 +164,18 @@ bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
     return resp;
 }
 
+// DEBUG
+// void imprimeGrafoAGM(Grafo *g, int ant[])
+// {
+//     Grafo agm;
+//     inicializarGrafoAdj(&agm, g->numVer);
+//     for (int i = 1; i < g->numVer; i++)
+//     {
+//         insereArestaND(&agm, i, ant[i], pesoAresta(g, i, ant[i]));
+//     }
+//     imprimeGrafoND(&agm);
+// }
+
 int main(int argc, char *argv[])
 {
     FILE *entrada = fopen(argv[1], "rt");
@@ -150,7 +184,6 @@ int main(int argc, char *argv[])
     int v;
     int a;
     int *resp;
-    int ult;
     bool erro = false;
     Grafo g;
     fscanf(entrada, "%d %d", &v, &a);
@@ -166,12 +199,14 @@ int main(int argc, char *argv[])
 
     if (sucesso && grafoConexoND)
     {
-        resp = agmPrim(&g, 0, &ult);
-        imprimirArq(&g, saida, resp, ult);
+        resp = agmPrim(&g, 0);
+        imprimirArq(&g, saida, resp);
     }
 
+    free(resp);
     fclose(entrada);
     fclose(saida);
+
 
     return 0;
 }
