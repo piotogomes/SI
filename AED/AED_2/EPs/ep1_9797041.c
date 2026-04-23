@@ -11,6 +11,11 @@
 
 // função para imprimir na saida corretamente
 
+typedef struct a {
+    int menor;
+    int maior;
+} ArestaAGM;
+
 void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
 {
 
@@ -23,7 +28,7 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
         }
     }
     fprintf(saida, "%.1f\n%d\n", soma, ult);
-    int aux[g->numVer];
+    ArestaAGM aux[g->numVer];
     // criar ordenação
     for (int i = 0; i < g->numVer; i++)
     {
@@ -44,10 +49,10 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[], int ult)
     }
 }
 
-void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
+int* agmPrim(Grafo *g, int raiz, int *ult)
 {
     Peso chPeso[g->numVer];
-    int ant[g->numVer];
+    int* ant = malloc(sizeof(int) * g->numVer);
     Heap fila;
     criarFila(&fila, g->numVer); // cria o heap
 
@@ -79,13 +84,15 @@ void agmPrim(Grafo *g, int raiz, int **resp, int *ult)
             }
         }
     }
-    *resp = ant; // arestas agm
+    return ant;
 }
 
 bool verifica_validade_vertice(int v, int numVer)
 {
-    if(v < 0) return false;
-    if(v >= numVer) return false;
+    if (v < 0)
+        return false;
+    if (v >= numVer)
+        return false;
     return true;
 }
 
@@ -113,13 +120,13 @@ bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
             fprintf(saida, "ERRO: AUTO-LACO (%d,%d)\n", v1, v2);
             resp = false;
         }
-        
+
         if (existeAresta(g, v1, v2))
         {
             if (v1 < v2)
-            fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
+                fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v1, v2);
             else
-            fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
+                fprintf(saida, "ERRO: ARESTA PARALELA (%d,%d)\n", v2, v1);
             resp = false;
         }
         if (p <= 0)
@@ -127,7 +134,8 @@ bool le_grafo(FILE *entrada, FILE *saida, Grafo *g, int v, int a)
             fprintf(saida, "ERRO: PESO INVALIDO (%.1f)\n", p);
             resp = false;
         }
-        if (verifica_validade_vertice(v1, v) && verifica_validade_vertice(v2, v)) {
+        if (verifica_validade_vertice(v1, v) && verifica_validade_vertice(v2, v))
+        {
             insereArestaND(g, v1, v2, p);
         }
     }
@@ -158,7 +166,7 @@ int main(int argc, char *argv[])
 
     if (sucesso && grafoConexoND)
     {
-        agmPrim(&g, 0, &resp, &ult);
+        resp = agmPrim(&g, 0, &ult);
         imprimirArq(&g, saida, resp, ult);
     }
 
