@@ -64,6 +64,7 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
             }
         }
     }
+    // imprime no arquivo ordenado
     for (int i = 0; i < g->numVer - 1; i++)
     {
         if (ant[orderIndex[i]] < orderIndex[i])
@@ -76,6 +77,8 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
         }
     }
 }
+
+//função prim
 
 int *agmPrim(Grafo *g, int raiz)
 {

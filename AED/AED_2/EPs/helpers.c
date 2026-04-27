@@ -18,7 +18,7 @@ void trocar(Heap *h, int i, int j)
     int tempV = h->heap[i];
     h->heap[i] = h->heap[j];
     h->heap[j] = tempV;
-
+    // atualiza posição
     h->pos[h->heap[i]] = i;
     h->pos[h->heap[j]] = j;
 }
@@ -82,7 +82,6 @@ int tamFila(Heap *h)
 
 int extrairFila(Heap *h, Peso chPeso[])
 {
-    // if(h->heapSize < 1) return -1;
     int min = h->heap[1];
     h->pos[min] = -1;
     h->heap[1] = h->heap[h->heapSize];
