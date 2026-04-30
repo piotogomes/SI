@@ -176,6 +176,7 @@ void liberaGrafo(Grafo *g)
 }
 
 // dot -Tpng grafo.dot -o imagem.png pra criar o png
+
 void imprimeGrafoND(Grafo *g)
 {
 

@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <float.h>
 
 // função para imprimir na saida corretamente
 
@@ -35,7 +37,7 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
     int orderIndex[g->numVer - 1];
     for (int i = 0; i < g->numVer - 1; i++)
     {
-        int menor = __INT_MAX__;
+        int menor = INT_MAX;
         for (int j = 1; j < g->numVer; j++)
         {
             // percorre valores
@@ -46,7 +48,7 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
             // percorre indices
             if (j < menor)
             {
-                if (aux[j] != __INT_MAX__)
+                if (aux[j] != INT_MAX)
                 {
                     menor = j;
                 }
@@ -54,14 +56,15 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
         }
         for (int j = 1; j < g->numVer; j++)
         {
-            if ((aux[j] != __INT_MAX__) && ((aux[j] == menor) || (j == menor)))
+            if ((aux[j] != INT_MAX) && ((aux[j] == menor) || (j == menor)))
             {
                 orderIndex[i] = j;
-                aux[j] = __INT_MAX__;
+                aux[j] = INT_MAX;
                 break;
             }
         }
     }
+    // imprime no arquivo ordenado
     for (int i = 0; i < g->numVer - 1; i++)
     {
         if (ant[orderIndex[i]] < orderIndex[i])
@@ -75,6 +78,8 @@ void imprimirArq(Grafo *g, FILE *saida, int ant[])
     }
 }
 
+//função prim
+
 int *agmPrim(Grafo *g, int raiz)
 {
     Peso chPeso[g->numVer];
@@ -84,7 +89,7 @@ int *agmPrim(Grafo *g, int raiz)
 
     for (int i = 0; i < g->numVer; i++)
     {
-        chPeso[i] = __INT_MAX__;
+        chPeso[i] = FLT_MAX;
         ant[i] = -1;
     }
     chPeso[raiz] = 0;

@@ -114,8 +114,8 @@ ApontadorVertAdj primeiroListaAdj(Grafo *g, int v)
 
 void liberaGrafo(Grafo *g);
 
-void imprimeGrafoND(Grafo *g)
 // dot -Tpng grafo.dot -o imagem.png pra criar o png
+void imprimeGrafoND(Grafo *g)
 {
     FILE *arq = fopen("grafo.dot", "w");
     fprintf(arq, "strict graph G { rankdir=LR; node [shape=rect, style=filled, color=lightblue];\n\n");
@@ -140,7 +140,6 @@ void imprimeGrafoND(Grafo *g)
 }
 
 void imprimeGrafoDir(Grafo *g)
-// dot -Tpng grafo.dot -o imagem.png pra criar o png
 {
     FILE *arq = fopen("grafo.dot", "w");
     fprintf(arq, "digraph G { rankdir=LR; node [shape=rect, style=filled, color=lightblue];\n\n");
