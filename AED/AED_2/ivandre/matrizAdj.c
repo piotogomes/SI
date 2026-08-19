@@ -31,3 +31,7 @@ void prof(int m[V][V], int i, int flags[V])
     }
     flags[i] = 2;
 }
+
+void larg(int m[V][V], int i, int flags[V]) {
+    
+}
