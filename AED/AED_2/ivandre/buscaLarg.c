@@ -2,26 +2,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include "listaAdj.c"
 
-#define V 100
 
-typedef struct s
-{
-    int adj;
-    struct s *prox;
-    int cia; // exemplo de usar sempre a mesma companhia nos voos (aresta)
-} NO;
-
-typedef struct
-{
-    NO *inicio;
-    int flag;   // flags para a busca
-    bool visto; // exemplo de viajar para cidades que contenham visto, e uma busca que retorna uma lista para poder viajar
-    int cap;    // exemplo de achar as salas conectadas com capacidade >= x
-    int tipo;   // 1 = posto (exemplo busca largura)
-    int dist;   // para a busca em largura no exemplo de achar a distancia
-
-} Vertice;
 
 ////////////////////////////////////////////////////////////////////////
 //  CAMINHO MAIS CURTO
@@ -82,9 +65,10 @@ void verticeMaisPerto(Vertice *g, int i, int tipo)
 {
     zerarFlag(g);
     g[i].flag = 1;
-    for(int j = 1; j <= V; j++) {
+    for (int j = 1; j <= V; j++)
+    {
         g[j].dist = -1;
-    } 
+    }
     g[i].dist = 0;
     Fila *f;
     fila_inicializar(f);
@@ -115,6 +99,49 @@ void verticeMaisPerto(Vertice *g, int i, int tipo)
         }
     }
 }
+
+// achar todos os caminho a partir das vias e atualiza os custos, mas não pega o menor custo
+
+void caminhos(Vertice *g, int i, int f)
+{
+    zerarFlag(g);
+    g[i].flag = 1;
+    for (int j = 1; j <= V; j++)
+    {
+        g[j].via = -1;
+        // g[j].peso = INT_MAX
+    }
+    g[i].custo = 0;
+    Fila *f;
+    fila_anexar(f, i);
+    while (!fila_vazia)
+    {
+        i = fila_retornar(f);
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                g[p->adj].flag = 1;
+                fila_anexar(f, p->adj);
+                g[p->adj].via = i;
+                g[p->adj].custo = g[i].custo + p->peso;
+            }
+            p = p->prox;
+        }
+        g[i].flag = 2;
+    }
+    int k = g[f].via;
+    while (k != -1)
+    {
+        printf("%d\n", k);
+        k = g[k].via;
+    }
+}
+
+// djikstra caminho de custo minimo
+
+
 
 int main()
 {
