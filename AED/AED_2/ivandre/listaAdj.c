@@ -22,8 +22,8 @@ typedef struct
     int dist;   // para a busca em largura no exemplo de achar a distancia
     int via;    // para o algoritmo de retornar o trajeto do caminho mais curto
     int custo;  // para guardar os custos de cada caminho
-    int pais; // exercicio 11
-    int cont; // contagem de paises ex 11
+    int pais;   // exercicio 11
+    int nPais;  // exercicio 11
 
 } Vertice;
 
