@@ -22,7 +22,7 @@ int fila_retornar(Fila* f) {
     NOfila* aux = f->inicio;
     f->inicio = aux->prox;
     free(aux);
-    if(f->inicio == NULL) f->fim == NULL;
+    if(f->inicio == NULL) f->fim = NULL;
     return primeiro;
 }
 

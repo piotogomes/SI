@@ -19,7 +19,7 @@ void larg(Vertice *g, int i)
     Fila *f;
     fila_inicializar(f);
     fila_anexar(f, i);
-    while (!fila_vazia)
+    while (!fila_vazia(f))
     {
         i = fila_retornar(f);
         g[i].flag = 2;

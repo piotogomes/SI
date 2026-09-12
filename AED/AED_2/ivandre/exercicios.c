@@ -347,9 +347,140 @@ void caminhoAateB(Vertice *g, int a, int b)
     prof16(g, a, b, &list, &achou);
     if (achou)
     {
-        while(list) {
+        while (list)
+        {
             printf("%d\n", list->adj);
             list = list->prox;
+        }
+    }
+}
+
+// 19 grafo nao dir completeo
+
+bool grafoCompleto(Vertice *g, int nV)
+{
+    for (int i = 1; i <= nV; i++)
+    {
+        NO *p = g[i].inicio;
+        int count = 0;
+        while (p)
+        {
+            count++;
+            p = p->prox;
+        }
+        if (count + 1 != nV)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+// 20 complemento
+
+Vertice *complemento(Vertice *g, int nV)
+{
+    Vertice *compG = (Vertice *)malloc(sizeof(Vertice) * (nV + 1));
+    int adjs[nV + 1];
+    for (int i = 1; i <= nV; i++)
+    {
+        compG[i].inicio = NULL;
+        for (int j = 1; j <= nV; j++)
+        {
+            adjs[j] = 0;
+        }
+        adjs[i] = 1;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            adjs[p->adj] = 1;
+            p = p->prox;
+        }
+        for (int k = 1; k <= nV; k++)
+        {
+            if (adjs[k] == 0)
+            {
+                NO *novo = (NO *)malloc(sizeof(NO));
+                novo->adj = k;
+                novo->prox = compG[i].inicio;
+                compG[i].inicio = novo;
+            }
+        }
+    }
+    return compG;
+}
+
+// 21 e 22 e 23 sala mais proxima (tipo 1 = cheio, 0 = vazio)
+
+NO *salaProx(Vertice *g, int i, int nV)
+{
+    Fila f;
+    fila_inicializar(&f);
+    fila_anexar(&f, i);
+    zerarFlag(g);
+    g[i].flag = 1;
+    NO *resp = (NO *)malloc(sizeof(NO) * nV);
+    resp = NULL;
+    bool achou = false;
+    while (!fila_vazia(&f))
+    {
+        i = fila_retornar(&f);
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        if (g[i].tipo == 0)
+        {
+            NO *novo = (NO *)malloc(sizeof(NO));
+            novo->adj = i;
+            novo->prox = resp;
+            resp = novo;
+            achou = true;
+        }
+        while (p)
+        {
+            if (g[p->adj].flag == 0 && !achou)
+            {
+                fila_anexar(&f, p->adj);
+                g[p->adj].flag = 1;
+            }
+            p = p->prox;
+        }
+    }
+    return resp;
+}
+
+// 24 usuarios com d graus de dist (na main inicializar as dist com -1)
+
+void exibirAmigos(Vertice *g, int i, int d, int nV)
+{
+    Fila f;
+    fila_inicializar(&f);
+    zerarFlag(g);
+    for (int j = 1; j <= nV; j++)
+    {
+        g[j].dist = -1;
+    }
+    g[i].flag = 1;
+    g[i].dist = 0;
+    fila_anexar(&f, i);
+    while (!fila_vazia(&f))
+    {
+
+        i = fila_retornar(&f);
+        if (g[i].dist <= d)
+        {
+            printf("grau: %d, amigo: %d\n", g[i].dist, i);
+        }
+        NO *p = g[i].inicio;
+        g[i].flag = 2;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                fila_anexar(&f, p->adj);
+                g[p->adj].dist = g[i].dist + 1;
+                g[p->adj].flag = 1;
+            }
+            p = p->prox;
         }
     }
 }
@@ -360,11 +491,12 @@ int main()
 
     inicializar(g1);
     insereAresta(g1, 1, 2, 0);
+    insereAresta(g1, 1, 3, 0);
     insereAresta(g1, 3, 4, 0);
+    insereAresta(g1, 3, 5, 0);
     insereAresta(g1, 5, 6, 0);
-    insereAresta(g1, 4, 5, 0);
+    insereAresta(g1, 5, 4, 0);
 
-    caminhoAateB(g1, 4, 3);
-
+    exibirAmigos(g1, 1, 1, 6);
     return 0;
 }
