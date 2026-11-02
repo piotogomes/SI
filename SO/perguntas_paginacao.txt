@@ -1,0 +1,73 @@
+Neste tarefa vamos usar um simulador simples de paginação para entender melhor
+como funciona a tradução de endereços com este mecanismo.
+
+Execute-o com:
+	python paging-linear-translate.py
+	
+Use a flag -h para listar as flags disponíveis
+
+
+Perguntas:
+
+1.  Antes de fazer qualquer tradução de endereço, vamos usar o simulador para
+    estudar como as tabelas de paginação lineares mudam de tamanho de acordo com
+    certos parâmetros.
+    Vamos calcular o tamanho das tabelas de paginação lineares conforme diferentes
+    parâmetros mudam. Os parâmetros são, basicamente, o tamanho de página e o
+    tamanho do espaço de endereçamento.
+    
+    Algumas entradas sugeridas estão abaixo. Usando a flag -v, você pode ver
+    facilmente quantas entradas a tabela de paginação possui.
+    Antes de executar os exemplos sugeridos, tente pensar sobre as tendências esperadas:
+    - Como o tamanho da tabela de páginas deve mudar conforme o espaço de endereço cresce?
+    - E conforme o tamanho da página cresce?
+    - Por que não usar páginas grandes, em geral?
+    
+    Primeiro, para entender como o tamanho da tabela de paginação linear muda
+    conforme o espaço de endereço cresce, execute o simulador com as flags abaixo:
+
+	-P 1k -a 1m -p 512m -v -n 0 # tamanho de pagina 1k, espaço de endereçamento de 1 mega, memória física de 512 mega
+	-P 1k -a 2m -p 512m -v -n 0 # tamanho de pagina 1k, espaço de endereçamento de 2 mega, memória física de 512 mega
+	-P 1k -a 4m -p 512m -v -n 0 # tamanho de pagina 1k, espaço de endereçamento de 4 mega, memória física de 512 mega
+	
+    Em seguida, para entender como o tamanho de página afeta a tabela de paginação, execute o simulador com as flags abaixo:
+    
+	-P 1k -a 1m -p 512m -v -n 0 # tamanho de pagina 1k, espaço de endereçamento de 1 mega, memória física de 512 mega
+	-P 2k -a 1m -p 512m -v -n 0 # tamanho de pagina 2k, espaço de endereçamento de 1 mega, memória física de 512 mega
+	-P 4k -a 1m -p 512m -v -n 0 # tamanho de pagina 4k, espaço de endereçamento de 1 mega, memória física de 512 mega
+	
+
+2.  Vamos fazer algumas traduções de endereço!
+    O simulador vai gerar uma tabela de paginação e alguns endereços para traduzir.
+    O formato da tabela de paginacao é simples:
+    O bit mais significativo (mais a esquerda) é o bit VALIDO.
+      Se este bit for 1, o restante da entrada da tabela representa o PFN (numero do page frame).
+      Se este bit for 0, a página nao é valida (portanto a tradução é inválida).
+    
+    Comece com alguns exemplos pequenos, alterando a porcentagem de páginas alocadas com a flag -u.
+    Por exemplo:
+
+	-P 1k -a 16k -p 32k -v -u 0
+	-P 1k -a 16k -p 32k -v -u 25
+	-P 1k -a 16k -p 32k -v -u 50
+	-P 1k -a 16k -p 32k -v -u 75
+	-P 1k -a 16k -p 32k -v -u 100
+
+    Confira suas respostas com a flag -c
+    O que acontece conforme a porcentagem de páginas alocadas é aumentada?
+
+
+3.  Vamos modificar os parâmetros para ver o que acontece:
+	
+	-P 8  -a 32   -p 1024 -v -s 1
+	-P 8k -a 32k  -p 1m   -v -s 2
+	-P 1m -a 256m -p 512m -v -s 3
+    
+    Quais dessas combinações não fazem muito sentido? Por quê?
+    
+
+4.  Brinque um pouco com o programa testando outro valores de parâmetros.
+    Você consegue descobrir quais os limites para fazer o programa não funcionar?
+    Por exemplo, o que acontece se o espaço de endereçamento for maior que a memória física?
+    
+    

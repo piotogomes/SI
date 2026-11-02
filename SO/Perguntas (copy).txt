@@ -1,0 +1,15 @@
+Perguntas:
+
+1) Considerando uma tabela de paginação linear, você precisa de apenas um registrador (o nosso querido PTBR)
+   para traduzir endereços (assumindo que a resolução de endereços é feita via hardware no caso de um TLB miss).
+   Quantos registradores são necessários para uma tabela de paginação em dois níveis?
+   E se fossem três níveis?
+
+2) Use o simulador para traduzir alguns endereços.
+   Quantas vezes a memória é consultada por tradução?
+
+3) Dado seu entendimento de como a memória cache funciona,
+   como você espera que as referências à memória usadas para
+   a tradução de endereços influenciem o cache?
+   Incorrerá em muitos cache miss (portanto introduzindo lentidão)?
+   Ou a maioria de acessos será um hit no cache (mais rápido)?

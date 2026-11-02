@@ -1,0 +1,15 @@
+INSERT Dump1.txt
+REMOVE 1
+INSERT Dump2.txt
+REMOVE 5
+INSERT Dump2.txt
+REMOVE 3
+REMOVE 2
+INPUT 6 0x3 Hah, como se isso fosse acontecer
+INPUT 6 0x3 Outro input? 
+INSERT Dump2.txt
+INSERT Dump2.txt
+INSERT Dump2.txt
+INSERT Dump2.txt
+INPUT 8 0x1 Foi!
+

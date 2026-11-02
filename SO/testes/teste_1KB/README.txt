@@ -1,0 +1,2 @@
+Esse teste está focado em garantir que as inserções e remoções estejam acontecendo corretamente. Mantendo a ordem esperada dos IDs e utilizando corretamente a política de Best Fit.
+Como a execução da inserção, remoção e escrita é determinística seguindo os algoritmos apresentados na orientação do EP. Vocês podem comparar as suas respostas com o arquivo "resposta.eachunk" disponibilizado. Uma forma de comparar é utilizando o comando diff do Linux no terminal ou outro equivalente.

@@ -1,0 +1,10 @@
+INSERT Dump1.txt
+DEFRAG
+INSERT Dump2.txt
+INSERT Dump3.txt
+REMOVE 30
+INSERT Dump3.txt
+INSERT Dump3.txt
+INSERT Dump2.txt
+INSERT Dump1.txt
+REMOVE 3

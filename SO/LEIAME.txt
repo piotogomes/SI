@@ -1,0 +1,171 @@
+
+Este programa permite que você veja como as traduções de endereços são 
+realizadas em um sistema com segmentação. A segmentação que este sistema utiliza
+é bastante simples: o espaço de endereçamento possui apenas *dois* segmentos; 
+consequentemente, o bit mais significativo do endereço virtual gerado pelo
+processo determina em qual segmento o endereço está: 0 para o segmento 0 (onde,
+por exemplo, o código e o heap residiriam) e 1 para o segmento 1 (onde a pilha
+está localizada). O segmento 0 cresce em direção positiva (em direção a
+endereços mais altos), enquanto o segmento 1 cresce em direção negativa.
+
+Visualmente, o espaço de endereçamento se parece com isto:
+
+ --------------- endereço virtual 0
+ |    seg0     |
+ |             |
+ |             |
+ |-------------|
+ |             |
+ |             |
+ |             |
+ |             |
+ |(não alocado)|
+ |             |
+ |             |
+ |             |
+ |-------------|
+ |             |
+ |    seg1     |
+ |-------------| endereço virtual máximo (tamanho do espaço de endereçamento -1)
+
+No esquema de segmentação, como você deve se lembrar, há um par de registradores
+base/limite por segmento. Portanto, nesta simulação, há dois pares base/limite.
+A base do segmento 0 indica qual endereço físico o *topo* do segmento 0 foi
+colocado na memória física, e o limite indica o tamanho do segmento;
+a base do segmento 1 indica onde a *base* do segmento 1 foi colocado na memória física,
+e o limite correspondente também nos diz o tamanho do segmento (ou até onde ele
+cresce em direção negativa).
+
+Há duas etapas para rodar o programa e testar sua compreensão de segmentação.
+Primeiro, rode sem a flag "-c" para gerar um conjunto de traduções e veja se
+você consegue realizar as traduções de endereço manualmente.
+Depois, quando terminar, rode com a flag "-c" para verificar suas respostas.
+
+Por exemplo, para rodar com as flags padrão, digite:
+
+prompt> python segmentation.py 
+
+Você deve ver o seguinte:
+
+	ARG semente 0
+	ARG tamanho do espaco de enderecamento: 1k bytes
+	ARG tamanho da memoria fisica: 16k bytes
+
+	Informacoes dos registradores dos segmentos:
+
+	  Segmento 0 base  (cresce para frente) : 0x00001aea (decimal 6890)
+	  Segmento 0 limite                     : 472
+
+	  Segmento 1 base  (cresce para trás) : 0x00001254 (decimal 4692)
+	  Segmento 1 limite                   : 450
+
+	Virtual Address (VA) Trace
+	  VA  0: 0x0000020b (decimal:  523) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  1: 0x0000019e (decimal:  414) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  2: 0x00000322 (decimal:  802) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  3: 0x00000136 (decimal:  310) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  4: 0x000001e8 (decimal:  488) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+
+	Para cada endereco virtual, anote o endereco fisico resultante OU anote que e' um endereco fora dos limites (uma violacao de segmentacao).
+	Para este problema, voce deve assumir um espaco de enderecamento simples com dois segmentos.
+	Portanto, o bit mais significativo do endereco virtual pode ser usado para verificar se o endereco virtual
+	esta' no segmento 0 (bit mais significativo==0) ou no segmento 1 (bit mais significativo==1).
+	Observe que o segmento 0 cresce na direcao positiva, enquanto o segmento 1 na negativa.
+
+
+Então, depois de calcular as traduções de endereço virtual manualmente, rode o
+programa novamente com a flag "-c". Você verá o seguinte:
+
+	ARG semente 0
+	ARG tamanho do espaco de enderecamento: 1k bytes
+	ARG tamanho da memoria fisica: 16k bytes
+
+	Informacoes dos registradores dos segmentos:
+
+	  Segmento 0 base  (cresce para frente) : 0x00001aea (decimal 6890)
+	  Segmento 0 limite                     : 472
+
+	  Segmento 1 base  (cresce para trás) : 0x00001254 (decimal 4692)
+	  Segmento 1 limite                   : 450
+
+	Virtual Address (VA) Trace
+	  VA  0: 0x0000020b (decimal:  523) --> VIOLACAO DE SEGMENTACAO (SEG1)
+	  VA  1: 0x0000019e (decimal:  414) --> VALIDO no SEG0: 0x00001c88 (decimal: 7304)
+	  VA  2: 0x00000322 (decimal:  802) --> VALIDO no SEG1: 0x00001176 (decimal: 4470)
+	  VA  3: 0x00000136 (decimal:  310) --> VALIDO no SEG0: 0x00001c20 (decimal: 7200)
+	  VA  4: 0x000001e8 (decimal:  488) --> VIOLACAO DE SEGMENTACAO (SEG0)
+
+
+Como você pode ver, com a flag -c, o programa traduz os endereços para você e,
+portanto, você pode verificar seu entendimento de como um sistema usando
+segmentação traduz endereços.
+
+Há alguns parâmetros que você pode usar para criar diferentes problemas.
+Um parâmetro particularmente importante é o parâmetro -s ou -seed, que permite
+gerar diferentes problemas passando uma semente aleatória diferente.
+Obviamente, certifique-se de usar a mesma semente aleatória ao gerar um problema e depois
+para verificar suas respostas.
+
+Há também alguns parâmetros que você pode usar para brincar com diferentes
+tamanhos de espaços de endereçamento e memórias físicas. Por exemplo, para
+experimentar segmentação em um sistema pequenino, você pode digitar:
+
+prompt> python segmentation.py -s 100 -a 16 -p 32
+	ARG semente 100
+	ARG tamanho do espaco de enderecamento: 16 bytes
+	ARG tamanho da memoria fisica: 32 bytes
+
+	Informacoes dos registradores dos segmentos:
+
+	  Segmento 0 base  (cresce para frente) : 0x00000018 (decimal 24)
+	  Segmento 0 limite                     : 4
+
+	  Segmento 1 base  (cresce para trás) : 0x00000012 (decimal 18)
+	  Segmento 1 limite                   : 5
+
+	Virtual Address (VA) Trace
+	  VA  0: 0x0000000c (decimal:   12) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  1: 0x00000008 (decimal:    8) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  2: 0x00000001 (decimal:    1) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  3: 0x00000007 (decimal:    7) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+	  VA  4: 0x00000000 (decimal:    0) --> Gera um endereco fisico (qual?) or uma violacao de segmentacao?
+
+
+o que instrui o programa a gerar endereços virtuais para um espaço de
+endereçamento de 16 bytes mapeado em uma memória física de 32 bytes.
+Como você pode ver, os endereços virtuais resultantes são minúsculos (12, 8, 1, 7 e 0).
+Como você também pode ver, o programa escolhe valores pequenos para os
+registradores base e limite, conforme apropriado. Execute novamente com a
+flag -c para ver as respostas. 
+
+Este exemplo também deve mostrar exatamente o significado de cada par de registradores.
+Por exemplo, a base do segmento 0 é definida para um endereço físico 24 (decimal)
+e tem tamanho de 4 bytes. Assim, os endereços *virtuais* 0, 1, 2 e 3 do segmento 0 são válidos,
+e são mapeados para os endereços físicos 24, 25, 26 e 27, respectivamente. 
+
+Um pouco mais complicado é o segmento 1, que cresce na direção negativa.
+No pequeno exemplo acima, o registrador base do segmento 1 é definido para o
+endereço físico 18, com um tamanho de 5 bytes. Isso significa que os últimos
+cinco bytes do espaço de endereçamento *virtual*, neste caso 11, 12, 13, 14 e 15,
+são endereços virtuais válidos e mapeiam para os endereços físicos 13, 14, 15, 16 e 17, respectivamente.
+
+Se isso não fizer sentido, leia novamente — você precisará entender como isso funciona para resolver qualquer um dos problemas sugeridos.
+
+Observe que você pode especificar valores maiores adicionando um "k", "m" ou até "g"
+aos valores que você passa com as flags -a ou -p, como em "kilobytes", "megabytes" e "gigabytes".
+Assim, se você quiser fazer algumas traduções com um espaço de endereçamento de
+1 MB definido em uma memória física de 32 MB, você pode digitar:
+
+	prompt> python segmentation.py -a 1m -p 32m
+
+Se você quiser ser ainda mais específico, pode definir os valores dos registradores
+base e limite você mesmo, com as flags --b0, --l0, --b1 e --l1. Experimente e veja.
+
+Finalmente, você sempre pode executar 
+
+	prompt> python segmentation.py -h 
+
+para obter uma lista completa de flags e opções.
+
+Divirta-se!
+

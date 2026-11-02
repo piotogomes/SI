@@ -484,19 +484,152 @@ void exibirAmigos(Vertice *g, int i, int d, int nV)
         }
     }
 }
+// 25 mensagens enviadas recebidas (peso = n de msg)
+
+NO *usuariosComKmsgs(Vertice *g, int i, int k, int nV)
+{
+    NO *resp = (NO *)malloc(sizeof(NO) * nV);
+    resp = NULL;
+    for (int j = 1; j <= nV; j++)
+    {
+        NO *p = g[j].inicio;
+        while (p)
+        {
+            if (p->peso >= k && (j == i || p->adj == i))
+            {
+                NO *novo = (NO *)malloc(sizeof(NO));
+                if (j == i)
+                {
+                    novo->adj = p->adj;
+                }
+                else if (p->adj == i)
+                {
+                    novo->adj = j;
+                }
+                novo->prox = resp;
+                resp = novo;
+            }
+            p = p->prox;
+        }
+    }
+    return resp;
+}
+
+// 26 menor caminho ab q passa por c
+
+NO *larg26(Vertice *g, int a, int b, int nV)
+{
+    Fila f;
+    fila_inicializar(&f);
+    zerarFlag(g);
+    fila_anexar(&f, a);
+    g[a].flag = 1;
+    for (int i = 0; i <= nV; i++)
+    {
+        g[i].via = -1;
+    }
+    NO *resp = NULL;
+    while (!fila_vazia(&f))
+    {
+        a = fila_retornar(&f);
+        g[a].flag = 2;
+        NO *p = g[a].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0)
+            {
+                fila_anexar(&f, p->adj);
+                g[p->adj].flag = 1;
+                g[p->adj].via = a;
+            }
+            p = p->prox;
+        }
+    }
+    int k = g[b].via;
+    while (k != -1)
+    {
+        NO *novo = (NO *)malloc(sizeof(NO));
+        novo->adj = k;
+        novo->prox = resp;
+        resp = novo;
+        k = g[k].via;
+    }
+    return resp;
+}
+
+NO *verificarMenorABporC(Vertice *g, int a, int b, int c, int nV)
+{
+    NO *priCaminho = larg26(g, a, c, nV);
+    NO *segCaminho = larg26(g, c, b, nV);
+    if (!priCaminho && !segCaminho)
+    {
+        return NULL;
+    }
+    NO *resp = priCaminho;
+    NO *p = priCaminho;
+
+    while (p->prox)
+    {
+        p = p->prox;
+    }
+    p->prox = segCaminho;
+
+    return resp;
+}
+
+// 27 e 28 menor caminho sem passar por n e chegar no tipo x
+
+int menorSemPassarN(Vertice *g, int i, int n, int x)
+{
+    Fila f;
+    fila_inicializar(&f);
+    zerarFlag(g);
+    g[i].flag = 1;
+    fila_anexar(&f, i);
+    while (!fila_vazia(&f))
+    {
+        i = fila_retornar(&f);
+        g[i].flag = 2;
+        NO *p = g[i].inicio;
+        while (p)
+        {
+            if (g[p->adj].flag == 0 && p->adj != n)
+            {
+                fila_anexar(&f, p->adj);
+                g[p->adj].flag = 1;
+            }
+            if (g[p->adj].tipo == x)
+            {
+                return p->adj;
+            }
+            p = p->prox;
+        }
+    }
+    return -1;
+}
 
 int main()
 {
     Vertice *g1 = (Vertice *)malloc(sizeof(Vertice) * (V + 1));
 
     inicializar(g1);
-    insereAresta(g1, 1, 2, 0);
-    insereAresta(g1, 1, 3, 0);
-    insereAresta(g1, 3, 4, 0);
-    insereAresta(g1, 3, 5, 0);
-    insereAresta(g1, 5, 6, 0);
-    insereAresta(g1, 5, 4, 0);
+    insereAresta(g1, 1, 2, 3);
+    insereAresta(g1, 2, 3, 2);
+    insereAresta(g1, 3, 6, 3);
+    insereAresta(g1, 2, 4, 4);
+    insereAresta(g1, 4, 5, 4);
+    insereAresta(g1, 5, 6, 3);
+    insereAresta(g1, 5, 7, 3);
 
-    exibirAmigos(g1, 1, 1, 6);
+    g1[1].tipo = 1;
+    g1[2].tipo = 2;
+    g1[3].tipo = 3;
+    g1[4].tipo = 3;
+    g1[5].tipo = 2;
+    g1[6].tipo = 1;
+    g1[7].tipo = 1;
+
+    printf("%d\n", menorSemPassarN(g1, 1, 3, 1));
+
     return 0;
 }

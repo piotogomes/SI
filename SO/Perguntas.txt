@@ -1,0 +1,30 @@
+O script segmentation.py permite que você veja como as traduções de endereços são realizadas
+em um sistema com segmentação. Veja o LEIAME para detalhes de como ele funciona.
+
+Perguntas
+
+	1. Primeiro, vamos usar um espaço de endereçamento pequeno para traduzir alguns endereços.
+	   Abaixo há um conjunto simples de parâmetros com algumas sementes aleatórias diferentes...
+	   Você consegue traduzir os endereços manualmente? (use -c para verificar sua resposta)
+		python segmentation.py -a 128 -p 512 -b 0 -l 20 -B 512 -L 20 -s 0
+		python segmentation.py -a 128 -p 512 -b 0 -l 20 -B 512 -L 20 -s 1
+		python segmentation.py -a 128 -p 512 -b 0 -l 20 -B 512 -L 20 -s 2
+		
+	2. Agora, vamos ver se entendemos este espaço de endereço que construímos (usando os parâmetros da pergunta acima).
+	   Qual é o endereço virtual válido mais alto do segmento 0?
+	   E quanto ao menor endereço virtual válido do segmento 1?
+	   Quais são os menores e maiores endereços ilegais em todo esse espaço de endereço?
+	   Por fim, como você executaria segmentation.py com a opção -A para testar se você está certo?
+	   
+	3. Digamos que temos um pequeno espaço de endereço de 16 bytes em uma memória física de 128 bytes.
+	   Que base e limites você configuraria para fazer o simulador gerar os seguintes resultados de tradução para o fluxo de endereço especificado:
+	   "válido, válido, violação, ..., violação, válido, válido"?
+	   Assuma os seguintes parâmetros (você deve trocar os ? pela sua resposta):
+	   	python segmentation.py -a 16 -p 128 -A 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 --b0 ? --l0 ? --b1 ? --l1 ?
+	   	
+	4. Suponha que queremos gerar uma simulação em que aproximadamente 90% dos endereços virtuais gerados aleatoriamente são válidos (não são violações de segmentação).
+	   Como você deve configurar o simulador para fazer isso?
+	   Quais parâmetros são importantes para obter esse resultado?
+	   
+	5. É possível executar o simulador de forma que nenhum endereço virtual seja válido? Como?
+	
