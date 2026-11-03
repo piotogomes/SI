@@ -38,17 +38,17 @@ typedef struct
 {
     uint32_t tamanho_mem;
     uint32_t mem_livre;
+    int nBlocos;
     Bloco *inicio;
 } Memoria;
 
 void printStats(Memoria *mem)
 {
     Bloco *p = mem->inicio;
+    printf("total:%d, nBlocos:%d\n", mem->tamanho_mem, mem->nBlocos);
     while (p)
     {
-        printf("id:%d\n", p->id);
-
-        // printf("end: %d, id: %d, tamtotal: %d, tam cont: %d\n", p->end, p->id, p->tamanho_total, p->tamanho_conteudo);
+        printf("end: %d, id: %d, tamtotal: %d, tam cont: %d\n", p->end, p->id, p->tamanho_total, p->tamanho_conteudo);
         // printf("conteudo: ");
         // for (int offset = 0; offset < p->tamanho_conteudo; offset++)
         // {
@@ -61,6 +61,7 @@ void printStats(Memoria *mem)
 void inicializarMemoria(Memoria *m)
 {
     m->inicio = NULL;
+    m->nBlocos = 0;
     m->mem_livre = m->tamanho_mem;
 }
 
@@ -75,6 +76,7 @@ void carregarImg(char *arq, Memoria *mem)
     mem->tamanho_mem = *((uint32_t *)data);
     inicializarMemoria(mem);
     size_t offset = sizeof(uint32_t);
+    Bloco *aux = NULL;
 
     while (offset < tamanho_arquivo)
     {
@@ -84,19 +86,21 @@ void carregarImg(char *arq, Memoria *mem)
         b->id = h->id;
         b->tamanho_total = h->tamanho_total;
         b->tamanho_conteudo = h->tamanho_conteudo;
-        b->prox = mem->inicio;
-        b->ant = NULL;
+        b->prox = NULL;
         b->conteudo = malloc(b->tamanho_conteudo);
         memcpy(b->conteudo, data + offset + sizeof(Header), b->tamanho_conteudo);
         mem->mem_livre -= b->tamanho_total;
-
-        if (mem->inicio != NULL)
+        b->ant = aux;
+        if (mem->inicio == NULL)
         {
-            mem->inicio->ant = b;
+            mem->inicio = b;
         }
-        mem->inicio = b;
-
+        else {
+            aux->prox = b;
+        }
+        aux = b;
         offset += sizeof(Header) + h->tamanho_conteudo;
+        mem->nBlocos++;
     }
     munmap(data, tamanho_arquivo);
     close(fd);
@@ -112,9 +116,16 @@ int removeBloco(int id, Memoria *mem)
     return 0;
 }
 
-int defrag(Memoria *mem)
+int defrag(Memoria *mem, int nBlocos) 
 {
+    Bloco** bs = (Bloco**) malloc(nBlocos * sizeof(Bloco*));
+    Bloco* p = mem->inicio;
+    for(int i = 0; i < nBlocos; i++) {
+        bs[i] = p;
+        p = p->prox;
+    }
 
+    
     return 0;
 }
 
@@ -138,7 +149,7 @@ void executarCmds(FILE *comandos, Memoria *mem)
         }
         else if (strcmp(cmd, "DEFRAG") == 0)
         {
-            defrag(mem);
+            defrag(mem, 0);
         }
         else if (strcmp(cmd, "REMOVE") == 0)
         {
