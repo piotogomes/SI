@@ -103,14 +103,14 @@ void salvarImg(char *arq, Memoria *mem)
         perror("Erro ao abrir arquivo de saída");
         return;
     }
-    if (ftruncate(fd, (mem->tamanho_mem - mem->mem_livre)) == -1)
+    if (ftruncate(fd, (sizeof(uint32_t) + mem->tamanho_mem - mem->mem_livre)) == -1)
     {
         perror("Erro na alocação");
         close(fd);
         return;
     }
 
-    uint8_t *data = mmap(NULL, (mem->tamanho_mem - mem->mem_livre), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    uint8_t *data = mmap(NULL, (sizeof(uint32_t) + mem->tamanho_mem - mem->mem_livre), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (data == MAP_FAILED)
     {
         perror("Erro no mmap de escrita");
@@ -132,19 +132,16 @@ void salvarImg(char *arq, Memoria *mem)
 
 
         memcpy(data + offset, &h, sizeof(Header));
-        offset += sizeof(Header);
-
-
         if (b->conteudo != NULL && b->tamanho_conteudo > 0)
         {
-            memcpy(data + offset, b->conteudo, b->tamanho_conteudo);
+            memcpy(data + offset + sizeof(Header), b->conteudo, b->tamanho_conteudo);
         }
 
-        offset += b->tamanho_conteudo;
+        offset += b->tamanho_conteudo + sizeof(Header);
         b = b->prox;
     }
 
-    munmap(data, mem->tamanho_mem);
+    munmap(data, sizeof(uint32_t) + mem->tamanho_mem - mem->mem_livre);
     close(fd);
 }
 
@@ -161,7 +158,7 @@ void carregarImg(char *arq, Memoria *mem)
     fstat(fd, &sb);
     size_t tamanho_arquivo = sb.st_size;
     uint8_t *data = mmap(NULL, tamanho_arquivo, PROT_READ, MAP_PRIVATE, fd, 0);
-    mem->tamanho_mem = *((uint32_t *)data);
+    mem->tamanho_mem = *((uint32_t *)data); // primeiro ponteiro
     inicializarMemoria(mem);
     size_t offset = sizeof(uint32_t);
     Bloco *aux = NULL;
@@ -180,7 +177,7 @@ void carregarImg(char *arq, Memoria *mem)
         b->prox = NULL;
         b->conteudo = malloc(b->tamanho_conteudo);
         memcpy(b->conteudo, data + offset + sizeof(Header), b->tamanho_conteudo);
-        mem->mem_livre -= b->tamanho_total;
+        mem->mem_livre -= (b->tamanho_conteudo + sizeof(Header));
         b->ant = aux;
         if (mem->inicio == NULL)
         {
@@ -194,17 +191,19 @@ void carregarImg(char *arq, Memoria *mem)
         offset += sizeof(Header) + h->tamanho_conteudo;
         mem->nBlocos++;
     }
-    munmap(data, tamanho_arquivo);
+    munmap(data, tamanho_arquivo );
     close(fd);
 }
 
 int insertDump(char *filename, Memoria *mem)
 {
+
     return 0;
 }
 
 int removeBloco(int id, Memoria *mem)
 {
+
     return 0;
 }
 
@@ -228,7 +227,6 @@ Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
         offset_atual += p->tamanho_total;
         p = p->prox;
     }
-    mem->mem_livre = mem->tamanho_mem - offset_atual;
 
     pthread_t *threads = (pthread_t *)malloc(numThreads * sizeof(pthread_t));
     DefragArgs *w_args = (DefragArgs *)malloc(numThreads * sizeof(DefragArgs));
@@ -283,7 +281,7 @@ void executarCmds(FILE *comandos, Memoria *mem)
         }
         else if (strcmp(cmd, "DEFRAG") == 0)
         {
-            defrag(mem, 0, 1);
+            // defrag(mem, 0, 1);
         }
         else if (strcmp(cmd, "REMOVE") == 0)
         {
@@ -325,9 +323,9 @@ int main(int argv, char **argc)
 
     FILE *comandos = fopen(cfile, "r");
     executarCmds(comandos, mem);
-    printStats(mem);
-    defrag(mem, 5, threads);
+    defrag(mem, mem->nBlocos, threads);
     salvarImg(sfile, mem);
+    printStats(mem);
     printf("\n%s %s %s %d\n", cfile, ifile, sfile, threads);
 
     return 0;
