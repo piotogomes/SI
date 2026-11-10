@@ -31,12 +31,21 @@ typedef struct s
 
 } Bloco;
 
+typedef struct BlocoLivre
+{
+    uint32_t end;
+    uint32_t tamanho;
+    struct BlocoLivre *prox;
+    struct BlocoLivre *ant;
+} BlocoLivre;
 typedef struct
 {
     uint32_t tamanho_mem;
     uint32_t mem_livre;
     int nBlocos;
+
     Bloco **vecBlocos;
+    BlocoLivre *inicioLivres;
 } Memoria;
 
 typedef struct
@@ -72,7 +81,7 @@ void *defrag_thread(void *arg)
 
 void printStats(Memoria *mem)
 {
-
+    printf("total:%d, memlivre:%d\n", mem->tamanho_mem, mem->mem_livre);
     for (int i = 0; i <= mem->nBlocos; i++)
     {
         Bloco *p = mem->vecBlocos[i];
@@ -87,7 +96,13 @@ void printStats(Memoria *mem)
             // printf("\n");
         }
     }
-    printf("total:%d, memlivre:%d\n", mem->tamanho_mem, mem->mem_livre);
+    printf("---------------livres---------------\n");
+    BlocoLivre *b = mem->inicioLivres;
+    while (b)
+    {
+        printf("end: %d, tam: %d,\n", b->end, b->tamanho);
+        b = b->prox;
+    }
 }
 void inicializarMemoria(Memoria *m)
 {
@@ -99,6 +114,54 @@ void inicializarMemoria(Memoria *m)
     }
     m->nBlocos = 0;
     m->mem_livre = m->tamanho_mem;
+    m->inicioLivres = NULL;
+}
+int encontrar_menor_id_livre(Memoria *mem)
+{
+    int maxBlocos = (mem->tamanho_mem / sizeof(Header)) + 16;
+    for (int id = 1; id < maxBlocos; id++)
+    {
+        if (mem->vecBlocos[id] == NULL)
+        {
+            return id;
+        }
+    }
+    return -1;
+}
+void inserir_bloco_livre_ordenado(Memoria *mem, BlocoLivre *novo)
+{
+
+    if (mem->inicioLivres == NULL)
+    {
+        mem->inicioLivres = novo;
+        novo->prox = NULL;
+        novo->ant = NULL;
+        return;
+    }
+
+    if (novo->tamanho < mem->inicioLivres->tamanho)
+    {
+        novo->prox = mem->inicioLivres;
+        novo->ant = NULL;
+        mem->inicioLivres->ant = novo;
+        mem->inicioLivres = novo;
+        return;
+    }
+
+    BlocoLivre *atual = mem->inicioLivres;
+    while (atual->prox != NULL && atual->prox->tamanho <= novo->tamanho)
+    {
+        atual = atual->prox;
+    }
+
+    novo->prox = atual->prox;
+    novo->ant = atual;
+
+    if (atual->prox != NULL)
+    {
+        atual->prox->ant = novo;
+    }
+    atual->prox = novo;
 }
 
 void salvarImg(char *arq, Memoria *mem)
@@ -170,6 +233,9 @@ void carregarImg(char *arq, Memoria *mem)
     mem->tamanho_mem = *((uint32_t *)data); // primeiro ponteiro
     inicializarMemoria(mem);
     size_t offset = sizeof(uint32_t);
+
+    uint32_t endereco_esperado = 0;
+
     while (offset < tamanho_arquivo)
     {
         Header *h = (Header *)(data + offset);
@@ -177,6 +243,20 @@ void carregarImg(char *arq, Memoria *mem)
         {
             break;
         }
+        if (h->end > endereco_esperado)
+        {
+            uint32_t tam_livre = h->end - endereco_esperado;
+
+            BlocoLivre *livre = (BlocoLivre *)malloc(sizeof(BlocoLivre));
+            livre->end = endereco_esperado;
+            livre->tamanho = tam_livre;
+            livre->prox = NULL;
+            livre->ant = NULL;
+
+            // Insere mantendo a ordem por TAMANHO
+            inserir_bloco_livre_ordenado(mem, livre);
+        }
+
         Bloco *b = malloc(sizeof(Bloco));
         b->end = h->end;
         b->id = h->id;
@@ -188,17 +268,124 @@ void carregarImg(char *arq, Memoria *mem)
 
         memcpy(b->conteudo, data + offset + sizeof(Header), b->tamanho_conteudo);
         mem->mem_livre -= (b->tamanho_conteudo + sizeof(Header));
+        endereco_esperado = h->end + h->tamanho_total;
         offset += sizeof(Header) + h->tamanho_conteudo;
         mem->nBlocos++;
     }
+
+    if (endereco_esperado < mem->tamanho_mem)
+    {
+        uint32_t tam_livre_final = mem->tamanho_mem - endereco_esperado;
+
+        BlocoLivre *livre_final = (BlocoLivre *)malloc(sizeof(BlocoLivre));
+        livre_final->end = endereco_esperado;
+        livre_final->tamanho = tam_livre_final;
+        livre_final->prox = NULL;
+        livre_final->ant = NULL;
+
+        inserir_bloco_livre_ordenado(mem, livre_final);
+    }
+
     munmap(data, tamanho_arquivo);
     close(fd);
 }
 
-int insertDump(char *filename, Memoria *mem)
+void insertDump(char *arq, Memoria *mem)
 {
+    int fd = open(arq, O_RDONLY);
+    if (fd == -1)
+    {
+        perror("Erro ao abrir arquivo de dump");
+        return;
+    }
 
-    return 0;
+    struct stat sb;
+    fstat(fd, &sb);
+    uint32_t tamanho_conteudo = (uint32_t)sb.st_size;
+    uint32_t tamanho_total = sizeof(Header) + tamanho_conteudo;
+
+    if (mem->mem_livre < tamanho_total)
+    {
+        printf("Erro: sem memória\n");
+        close(fd);
+        return;
+    }
+    int novo_id = encontrar_menor_id_livre(mem);
+    if (novo_id == -1)
+    {
+        printf("sem id??\n");
+        close(fd);
+        exit(1);
+    }
+
+    BlocoLivre *b = mem->inicioLivres;
+    while (b != NULL && b->tamanho < tamanho_total)
+    {
+        b = b->prox;
+    }
+
+    if (b == NULL)
+    {
+        fprintf(stderr, "Erro: Sem espaço contíguo suficiente para Best Fit.\n");
+        close(fd);
+        return;
+    }
+
+    uint8_t *data = mmap(NULL, tamanho_conteudo, PROT_READ, MAP_PRIVATE, fd, 0);
+    if (data == MAP_FAILED)
+    {
+        perror("Erro no mmap do dump");
+        close(fd);
+        return;
+    }
+
+    Bloco *novo = (Bloco *)malloc(sizeof(Bloco));
+    novo->id = novo_id;
+    novo->end = b->end;
+    novo->tamanho_total = tamanho_total;
+    novo->tamanho_conteudo = tamanho_conteudo;
+    novo->conteudo = (uint8_t *)malloc(tamanho_conteudo);
+
+    memcpy(novo->conteudo, data, tamanho_conteudo);
+
+    munmap(data, tamanho_conteudo);
+    close(fd);
+
+    mem->vecBlocos[novo_id] = novo;
+    mem->mem_livre -= tamanho_total;
+    mem->nBlocos++;
+
+    if (b->tamanho == tamanho_total)
+    {
+
+        if (b->ant != NULL)
+            b->ant->prox = b->prox;
+        else
+            mem->inicioLivres = b->prox;
+
+        if (b->prox != NULL)
+            b->prox->ant = b->ant;
+
+        free(b);
+    }
+    else
+    {
+
+        if (b->ant != NULL)
+            b->ant->prox = b->prox;
+        else
+            mem->inicioLivres = b->prox;
+
+        if (b->prox != NULL)
+            b->prox->ant = b->ant;
+
+        b->end += tamanho_total;
+        b->tamanho -= tamanho_total;
+        b->prox = NULL;
+        b->ant = NULL;
+
+        inserir_bloco_livre_ordenado(mem, b);
+    }
 }
 
 int removeBloco(int id, Memoria *mem)
@@ -207,6 +394,13 @@ int removeBloco(int id, Memoria *mem)
     {
         Bloco *b = mem->vecBlocos[id];
         mem->mem_livre += b->tamanho_total;
+        BlocoLivre *novo = (BlocoLivre *)malloc(sizeof(BlocoLivre));
+        novo->end = b->end;
+        novo->tamanho = b->tamanho_total;
+        novo->prox = NULL;
+        novo->ant = NULL;
+
+        inserir_bloco_livre_ordenado(mem, novo);
         if (b->conteudo != NULL)
         {
             free(b->conteudo);
@@ -232,7 +426,24 @@ Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
     }
 
     if (total_ativos == 0)
+    {
+        BlocoLivre *curr = mem->inicioLivres;
+        while (curr != NULL)
+        {
+            BlocoLivre *temp = curr;
+            curr = curr->prox;
+            free(temp);
+        }
+
+        BlocoLivre *livre_unico = (BlocoLivre *)malloc(sizeof(BlocoLivre));
+        livre_unico->end = 0;
+        livre_unico->tamanho = mem->tamanho_mem;
+        livre_unico->prox = NULL;
+        livre_unico->ant = NULL;
+
+        mem->inicioLivres = livre_unico;
         return mem;
+    }
 
     if (numThreads > total_ativos)
         numThreads = total_ativos;
@@ -286,6 +497,25 @@ Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
     free(threads);
     free(w_args);
 
+    BlocoLivre *curr = mem->inicioLivres;
+    while (curr != NULL)
+    {
+        BlocoLivre *temp = curr;
+        curr = curr->prox;
+        free(temp);
+    }
+    mem->inicioLivres = NULL;
+
+    if (offset_atual < mem->tamanho_mem)
+    {
+        BlocoLivre *livre_unico = (BlocoLivre *)malloc(sizeof(BlocoLivre));
+        livre_unico->end = offset_atual;
+        livre_unico->tamanho = mem->tamanho_mem - offset_atual;
+        livre_unico->prox = NULL;
+        livre_unico->ant = NULL;
+
+        mem->inicioLivres = livre_unico;
+    }
     return mem;
 }
 
@@ -316,7 +546,7 @@ void executarCmds(FILE *comandos, Memoria *mem)
             int id;
             if (sscanf(line, "REMOVE %d", &id) == 1)
             {
-                // removeBloco(id, mem);
+                removeBloco(id, mem);
             }
         }
         else if (strcmp(cmd, "INPUT") == 0)
@@ -350,19 +580,18 @@ int main(int argv, char **argc)
     carregarImg(ifile, mem);
 
     FILE *comandos = fopen(cfile, "r");
+    printStats(mem);
     executarCmds(comandos, mem);
+    // defrag(mem, mem->nBlocos, threads);
+    // defrag(mem, mem->nBlocos, threads);
+    // removeBloco(3, mem);
+    printStats(mem);
+    defrag(mem, mem->nBlocos, threads);
+    printStats(mem);
 
-    defrag(mem, mem->nBlocos, threads);
-    printStats(mem);
-    removeBloco(3, mem);
-    printStats(mem);
-    
-    defrag(mem, mem->nBlocos, threads);
-    
-    printf("%s %d\n", sfile, threads);
-    printStats(mem);
     salvarImg(sfile, mem);
 
+    printf("%s %d\n", sfile, threads);
     free(mem);
     return 0;
 }
