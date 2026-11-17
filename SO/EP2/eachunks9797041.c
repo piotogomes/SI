@@ -1,4 +1,4 @@
-#define _GNU_SOURCE /* [MUDANCA 1] necessario p/ ftruncate com -std=c11 */
+#define _GNU_SOURCE 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
-#include <sys/sysinfo.h> /* get_nprocs */
+#include <sys/sysinfo.h> /* nprocs */
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -45,7 +45,7 @@ typedef struct
     uint32_t tamanho_mem;
     uint32_t mem_livre;
     int nBlocos;
-    int maxBlocos; /* [MUDANCA 2] tamanho do vetor vecBlocos */
+    int maxBlocos; 
 
     Bloco **vecBlocos;
     BlocoLivre *inicioLivres;
@@ -53,16 +53,14 @@ typedef struct
 
 void inicializarMemoria(Memoria *m)
 {
-    /* [MUDANCA 2] /4 em vez de /16: os blocos podem ter menos de 16 bytes
-       (ex.: total 13), entao /16 podia estourar o vetor. calloc ja zera. */
-    int maxBlocos = (m->tamanho_mem / 4) + 16 + m->maxBlocos; /* + maior id da imagem */
+    int maxBlocos = (m->tamanho_mem / 4) + 16 + m->maxBlocos; 
     m->maxBlocos = maxBlocos;
     m->vecBlocos = (Bloco **)calloc(maxBlocos, sizeof(Bloco *));
     m->nBlocos = 0;
     m->mem_livre = m->tamanho_mem;
     m->inicioLivres = NULL;
 }
-int encontrar_menor_id_livre(Memoria *mem)
+int menorIDLivre(Memoria *mem)
 {
     for (int id = 1; id < mem->maxBlocos; id++)
     {
@@ -74,14 +72,12 @@ int encontrar_menor_id_livre(Memoria *mem)
     return -1;
 }
 
-/* [MUDANCA 3] lista de livres ordenada por (tamanho, endereco):
-   o desempate pelo MENOR ENDERECO era o que faltava. */
-static int livre_vem_antes(BlocoLivre *a, BlocoLivre *b)
+int checkOrdemLivres(BlocoLivre *a, BlocoLivre *b)
 {
     return a->tamanho < b->tamanho || (a->tamanho == b->tamanho && a->end < b->end);
 }
 
-void inserir_bloco_livre_ordenado(Memoria *mem, BlocoLivre *novo)
+void inserirBlocoLivre(Memoria *mem, BlocoLivre *novo)
 {
 
     if (mem->inicioLivres == NULL)
@@ -92,7 +88,7 @@ void inserir_bloco_livre_ordenado(Memoria *mem, BlocoLivre *novo)
         return;
     }
 
-    if (livre_vem_antes(novo, mem->inicioLivres))
+    if (checkOrdemLivres(novo, mem->inicioLivres))
     {
         novo->prox = mem->inicioLivres;
         novo->ant = NULL;
@@ -102,7 +98,7 @@ void inserir_bloco_livre_ordenado(Memoria *mem, BlocoLivre *novo)
     }
 
     BlocoLivre *atual = mem->inicioLivres;
-    while (atual->prox != NULL && livre_vem_antes(atual->prox, novo))
+    while (atual->prox != NULL && checkOrdemLivres(atual->prox, novo))
     {
         atual = atual->prox;
     }
@@ -127,8 +123,7 @@ static void desligar_livre(Memoria *mem, BlocoLivre *l)
         l->prox->ant = l->ant;
 }
 
-/* [MUDANCA 4] blocos ordenados por endereco (o arquivo de imagem exige
-   essa ordem; o defrag tambem usa). Substitui o "for i <= nBlocos". */
+/* ordenar por endereco, tive q ver como faz */
 static int compararPorEnd(const void *a, const void *b)
 {
     const Bloco *x = *(const Bloco **)a;
@@ -152,17 +147,18 @@ static Bloco **obterBlocosOrdenados(Memoria *mem, int *qtd)
     return ord;
 }
 
-/* [MUDANCA 14] printStats para debug (so e chamado se compilar com -DDEBUG) */
 void printStats(Memoria *mem)
 {
     printf("total:%u, memlivre:%u\n", mem->tamanho_mem, mem->mem_livre);
-    for (int i = 0; i < mem->maxBlocos; i++)
+    int n;
+    Bloco** bp = obterBlocosOrdenados(mem, &n);
+    for (int i = 0; i < n; i++)
     {
-        Bloco *p = mem->vecBlocos[i];
+        Bloco *p = bp[i];
         if (p)
         {
-            printf("end: %u, id: %u, tamtotal: %u, tam cont: %u pos: %d\n",
-                   p->end, p->id, p->tamanho_total, p->tamanho_conteudo, i);
+            printf("end: %u, id: %u, tamtotal: %u, tam cont: %u\n",
+                   p->end, p->id, p->tamanho_total, p->tamanho_conteudo);
             // printf("conteudo: ");
             // for (uint32_t o = 0; o < p->tamanho_conteudo; o++)
             // {
@@ -188,8 +184,7 @@ void salvarImg(char *arq, Memoria *mem)
     int count = 0;
     Bloco **ord = obterBlocosOrdenados(mem, &count);
 
-    /* [MUDANCA 5] omite os zeros finais do conteudo (exigencia 1) e calcula
-       o tamanho REAL do arquivo (cabecalho + conteudo de cada bloco). */
+
     size_t tamanho_arquivo = sizeof(uint32_t);
     for (int i = 0; i < count; i++)
     {
@@ -248,8 +243,6 @@ void salvarImg(char *arq, Memoria *mem)
     free(ord);
 }
 
-/* [MUDANCA 13] threads so em carregarImg: a copia dos conteudos dos blocos
-   (mmap da imagem -> malloc de cada bloco) e dividida em fatias entre as threads. */
 typedef struct
 {
     Bloco **bl;
@@ -322,8 +315,6 @@ void carregarImg(char *arq, Memoria *mem, int threads)
     uint8_t *data = mmap(NULL, tamanho_arquivo, PROT_READ, MAP_PRIVATE, fd, 0);
     memcpy(&mem->tamanho_mem, data, 4); // primeiro ponteiro
 
-    /* [MUDANCA 2b] pre-varredura: descobre o maior id da imagem (ids podem ser
-       esparsos), para que vecBlocos sempre comporte todos os ids */
     uint32_t maior_id = 0;
     for (size_t o = sizeof(uint32_t); o + sizeof(Header) <= tamanho_arquivo;)
     {
@@ -346,7 +337,7 @@ void carregarImg(char *arq, Memoria *mem, int threads)
 
     while (offset < tamanho_arquivo)
     {
-        Header hdr; /* memcpy: evita ponteiro desalinhado */
+        Header hdr; 
         memcpy(&hdr, data + offset, sizeof(Header));
         Header *h = &hdr;
         if (h->tamanho_total == 0)
@@ -363,7 +354,7 @@ void carregarImg(char *arq, Memoria *mem, int threads)
             livre->prox = NULL;
             livre->ant = NULL;
 
-            inserir_bloco_livre_ordenado(mem, livre);
+            inserirBlocoLivre(mem, livre);
         }
 
         Bloco *b = malloc(sizeof(Bloco));
@@ -394,7 +385,7 @@ void carregarImg(char *arq, Memoria *mem, int threads)
         livre_final->prox = NULL;
         livre_final->ant = NULL;
 
-        inserir_bloco_livre_ordenado(mem, livre_final);
+        inserirBlocoLivre(mem, livre_final);
     }
 
     copiar_paralelo(bl, src, nCopias, threads);
@@ -405,8 +396,6 @@ void carregarImg(char *arq, Memoria *mem, int threads)
     close(fd);
 }
 
-/* [MUDANCA 6] defrag sequencial: ordena por endereco, empilha os blocos
-   no inicio e recria um unico buraco livre no final. Sem threads. */
 Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
 {
     (void)nBlocos;
@@ -445,7 +434,7 @@ Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
     return mem;
 }
 
-static BlocoLivre *buscar_livre(Memoria *mem, uint32_t tam)
+BlocoLivre *buscar_livre(Memoria *mem, uint32_t tam)
 {
     /* lista ordenada por (tamanho, endereco): o primeiro que couber e o Best Fit */
     BlocoLivre *b = mem->inicioLivres;
@@ -462,7 +451,6 @@ void insertDump(char *arq, Memoria *mem, int threads)
         return;
     }
 
-    /* [MUDANCA 7] formato do dump: <total(4)><conteudo(4)><bytes do conteudo> */
     struct stat sb;
     fstat(fd, &sb);
     size_t tam_arq = (size_t)sb.st_size;
@@ -486,14 +474,14 @@ void insertDump(char *arq, Memoria *mem, int threads)
     if (tamanho_conteudo > tamanho_total)
         tamanho_conteudo = tamanho_total;
 
-    /* sem espaco livre total: falha em silencio, SEM desfragmentar */
+
     if (tamanho_total == 0 || mem->mem_livre < tamanho_total)
     {
         munmap(data, tam_arq);
         close(fd);
         return;
     }
-    int novo_id = encontrar_menor_id_livre(mem);
+    int novo_id = menorIDLivre(mem);
     if (novo_id == -1)
     {
         munmap(data, tam_arq);
@@ -503,7 +491,7 @@ void insertDump(char *arq, Memoria *mem, int threads)
 
     BlocoLivre *b = buscar_livre(mem, tamanho_total);
 
-    /* [MUDANCA 8] defrag compulsoria: ha espaco total mas nao contiguo */
+
     if (b == NULL)
     {
         defrag(mem, mem->nBlocos, threads);
@@ -544,7 +532,7 @@ void insertDump(char *arq, Memoria *mem, int threads)
         b->prox = NULL;
         b->ant = NULL;
 
-        inserir_bloco_livre_ordenado(mem, b);
+        inserirBlocoLivre(mem, b);
     }
 }
 
@@ -557,8 +545,6 @@ int removeBloco(int id, Memoria *mem)
         Bloco *b = mem->vecBlocos[id];
         mem->mem_livre += b->tamanho_total;
 
-        /* [MUDANCA 9] coalescencia: funde com buracos vizinhos
-           (um que termina onde o bloco comeca, outro que comeca onde ele termina) */
         uint32_t ini = b->end;
         uint32_t tam = b->tamanho_total;
         BlocoLivre *l = mem->inicioLivres;
@@ -587,7 +573,7 @@ int removeBloco(int id, Memoria *mem)
         novo->prox = NULL;
         novo->ant = NULL;
 
-        inserir_bloco_livre_ordenado(mem, novo);
+        inserirBlocoLivre(mem, novo);
         if (b->conteudo != NULL)
         {
             free(b->conteudo);
@@ -598,7 +584,7 @@ int removeBloco(int id, Memoria *mem)
     return 0;
 }
 
-/* [MUDANCA 10] comando INPUT, que antes nao fazia nada */
+
 void execInput(int id, unsigned int offset, char *text, Memoria *mem)
 {
     if (!text || id <= 0 || id >= mem->maxBlocos || !mem->vecBlocos[id])
@@ -618,7 +604,6 @@ void execInput(int id, unsigned int offset, char *text, Memoria *mem)
         uint8_t *novo_ptr = realloc(b->conteudo, fim);
         if (!novo_ptr)
             return;
-        /* bytes entre o conteudo antigo e o offset devem ser 0x00 */
         if (offset > b->tamanho_conteudo)
             memset(novo_ptr + b->tamanho_conteudo, 0, offset - b->tamanho_conteudo);
         b->conteudo = novo_ptr;
@@ -647,7 +632,7 @@ void executarCmds(FILE *comandos, Memoria *mem, int threads)
         }
         else if (strcmp(cmd, "DEFRAG") == 0)
         {
-            defrag(mem, mem->nBlocos, threads); /* [MUDANCA 11] estava comentado */
+            defrag(mem, mem->nBlocos, threads); 
         }
         else if (strcmp(cmd, "REMOVE") == 0)
         {
@@ -696,17 +681,13 @@ int main(int argv, char **argc)
         perror("Erro ao abrir arquivo de comandos");
         return 1;
     }
-#ifdef DEBUG
     printStats(mem);
     printf("\n ---------------- depois dos comandos ---------------- \n");
-#endif
+
     executarCmds(comandos, mem, threads);
     fclose(comandos);
-#ifdef DEBUG
     printStats(mem);
-#endif
 
-    /* [MUDANCA 12] removidos os printStats, o defrag final nao pedido e o printf */
     salvarImg(sfile, mem);
 
     return 0;
