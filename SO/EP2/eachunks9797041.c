@@ -396,9 +396,9 @@ void carregarImg(char *arq, Memoria *mem, int threads)
     close(fd);
 }
 
-Memoria *defrag(Memoria *mem, int nBlocos, int numThreads)
+Memoria *defrag(Memoria *mem, int numThreads)
 {
-    (void)nBlocos;
+
     (void)numThreads;
     if (mem == NULL)
         return mem;
@@ -494,7 +494,7 @@ void insertDump(char *arq, Memoria *mem, int threads)
 
     if (b == NULL)
     {
-        defrag(mem, mem->nBlocos, threads);
+        defrag(mem, threads);
         b = buscar_livre(mem, tamanho_total);
     }
     if (b == NULL)
@@ -632,7 +632,7 @@ void executarCmds(FILE *comandos, Memoria *mem, int threads)
         }
         else if (strcmp(cmd, "DEFRAG") == 0)
         {
-            defrag(mem, mem->nBlocos, threads); 
+            defrag(mem, threads); 
         }
         else if (strcmp(cmd, "REMOVE") == 0)
         {
@@ -681,12 +681,12 @@ int main(int argv, char **argc)
         perror("Erro ao abrir arquivo de comandos");
         return 1;
     }
-    printStats(mem);
-    printf("\n ---------------- depois dos comandos ---------------- \n");
+    // printStats(mem);
+    // printf("\n ---------------- depois dos comandos ---------------- \n");
 
     executarCmds(comandos, mem, threads);
     fclose(comandos);
-    printStats(mem);
+    // printStats(mem);
 
     salvarImg(sfile, mem);
 
